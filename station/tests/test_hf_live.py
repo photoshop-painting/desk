@@ -42,6 +42,14 @@ def _tooling_ready() -> tuple[bool, str]:
 
 TOOLING_OK, WHY_NO_TOOLING = _tooling_ready()
 
+# پوستهٔ Space با گرادیو بالا می‌آید؛ گرادیون (مثل node_modules) در پیمان‌های کاری نگه
+# داشته نمی‌شود، پس نبودنش «رد» تمیز است، نه «خطا».
+try:
+    import gradio  # noqa: F401
+    GRADIO_OK, WHY_NO_GRADIO = True, ""
+except Exception:
+    GRADIO_OK, WHY_NO_GRADIO = False, "gradio در این محیط نصب نیست (پوستهٔ Space)"
+
 sys.path.insert(0, str(BASE))
 sys.path.insert(0, str(BASE / "deploy"))
 sys.path.insert(0, str(BASE / "deploy" / "huggingface-live"))
@@ -217,6 +225,7 @@ class TestLiveBundleShape(LiveBundleBase):
 
 
 @unittest.skipUnless(TOOLING_OK, WHY_NO_TOOLING)
+@unittest.skipUnless(GRADIO_OK, WHY_NO_GRADIO)
 class TestLiveBoot(LiveBundleBase):
     """بسته را واقعاً بالا می‌آوریم و از بیرون می‌آزماییم (بدون توکن HF)."""
 

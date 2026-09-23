@@ -280,6 +280,99 @@ def _fmt(v, digits: int = 2, suffix: str = "") -> str:
     return html.escape(str(v))
 
 
+def _tofa(s: str) -> str:
+    """اعداد لاتین را فارسی می‌کند (۰-۹ و جداکننده‌های فارسی)."""
+    out = []
+    for ch in str(s):
+        if ch.isdigit():
+            out.append(chr(0x06F0 + int(ch)))
+        elif ch == ",":
+            out.append("٬")
+        elif ch == ".":
+            out.append("٫")
+        else:
+            out.append(ch)
+    return "".join(out)
+
+
+def _equity_chart_svg(curve: list, capital: float) -> str:
+    """نمودار خطی منحنی سرمایه — SVG خالص، بدون وابستگی (spec: محور مقدار سمت راست، تیک‌های فارسی).
+
+    جهت زمان راست‌به‌چپ است (راست = شروع) مطابق چیدمان RTL گزارش.
+    """
+    if not curve or len(curve) < 2:
+        return ('<div class="chart-empty">هنوز معامله‌ای در پس‌آزمایی ثبت نشده است؛ '
+                'این نمودار پس از ثبت اولین معاملهٔ تأییدشده شکل می‌گیرد.</div>')
+
+    W, H = 760, 300
+    top, right, bottom, left = 26, 96, 40, 18
+    x_left, x_right = left, W - right          # plot area
+    y_top, y_bot = top, H - bottom
+    eqs = [float(pt["equity"]) for pt in curve]
+    lo, hi = min(eqs), max(eqs)
+    if hi - lo < 1e-9:
+        hi = lo + 1.0
+    pad = (hi - lo) * 0.08
+    lo, hi = lo - pad, hi + pad
+
+    n = len(curve)
+
+    def x(i: int) -> float:
+        # RTL: معاملهٔ اول (شروع) سمت راست، آخرین معامله سمت چپ
+        return x_right - (x_right - x_left) * (i / (n - 1))
+
+    def y(v: float) -> float:
+        return y_bot - (y_bot - y_top) * ((v - lo) / (hi - lo))
+
+    parts = [f'<svg viewBox="0 0 {W} {H}" role="img" '
+             f'aria-label="نمودار خطی منحنی سرمایه پس از هر معامله، از راست (شروع) به چپ" '
+             f'xmlns="http://www.w3.org/2000/svg" class="echart">']
+    parts.append(f'<title>منحنی سرمایه: {_tofa(int(eqs[0] / 1e9))} به '
+                 f'{_tofa(int(eqs[-1] / 1e9))} میلیارد ریال در {n - 1} معامله</title>')
+    parts.append('<style>.echart text{font-family:Tahoma,"Segoe UI",sans-serif;fill:#6b7280;'
+                 'font-size:11px}.echart .grid{stroke:#e3e6ea;stroke-width:1}'
+                 '.echart .ref{stroke:#b3261e;stroke-width:1;stroke-dasharray:4 3}'
+                 '.echart .line{fill:none;stroke:#3b2f63;stroke-width:2;stroke-linejoin:round}'
+                 '.echart .area{fill:rgba(59,47,99,.08)}</style>')
+
+    # شبکه + محور مقدار سمت راست (به میلیارد ریال)
+    for g in range(5):
+        v = lo + (hi - lo) * (g / 4)
+        yy = y(v)
+        parts.append(f'<line class="grid" x1="{x_left:.1f}" y1="{yy:.1f}" '
+                     f'x2="{x_right:.1f}" y2="{yy:.1f}"/>')
+        parts.append(f'<text x="{x_right + 6:.1f}" y="{yy + 4:.1f}" text-anchor="start">'
+                     f'{_tofa(f"{v / 1e9:,.1f}")}</text>')
+    parts.append(f'<text x="{x_right + 6:.1f}" y="{top - 10:.1f}" text-anchor="start">'
+                 f'میلیارد ریال</text>')
+
+    # خط مرجع سرمایهٔ شروع
+    y0 = y(float(capital))
+    if y_top <= y0 <= y_bot:
+        parts.append(f'<line class="ref" x1="{x_left:.1f}" y1="{y0:.1f}" '
+                     f'x2="{x_right:.1f}" y2="{y0:.1f}"/>')
+
+    # خط زمانی (راست = شروع)
+    parts.append(f'<line class="grid" x1="{x_left:.1f}" y1="{y_bot:.1f}" '
+                 f'x2="{x_right:.1f}" y2="{y_bot:.1f}"/>')
+    mid = (n - 1) // 2
+    for i, lab in ((0, "شروع"), (mid, _tofa(mid)), (n - 1, _tofa(n - 1))):
+        parts.append(f'<text x="{x(i):.1f}" y="{y_bot + 18:.1f}" text-anchor="middle">{lab}</text>')
+    parts.append(f'<text x="{(x_left + x_right) / 2:.1f}" y="{H - 6:.1f}" text-anchor="middle">'
+                 f'ترتیب معاملات (از راست: شروع)</text>')
+
+    pts = [(x(i), y(v)) for i, v in enumerate(eqs)]
+    d = "M " + " L ".join(f"{px:.1f} {py:.1f}" for px, py in pts)
+    parts.append(f'<path class="area" d="{d} L {x(n - 1):.1f} {y_bot:.1f} '
+                 f'L {x(0):.1f} {y_bot:.1f} Z"/>')
+    parts.append(f'<path class="line" d="{d}"/>')
+    # نقطهٔ پایانی (آخرین معامله، سمت چپ)
+    ex, ey = pts[-1]
+    parts.append(f'<circle cx="{ex:.1f}" cy="{ey:.1f}" r="3.5" fill="#3b2f63"/>')
+    parts.append("</svg>")
+    return "".join(parts)
+
+
 def build_report(result: dict, path: str | Path, title: str = "گزارش پس‌آزمایی") -> Path:
     p = Path(path)
     p.parent.mkdir(parents=True, exist_ok=True)
@@ -294,6 +387,8 @@ def build_report(result: dict, path: str | Path, title: str = "گزارش پس�
         f"<td class='num'>{_fmt(d.realized_annualized_pct)}</td>"
         f"<td class='num'>{_fmt(d.period_realized_pct)}</td></tr>"
         for d in result["decisions"][:400])
+
+    chart = _equity_chart_svg(result.get("equity_curve") or [], s.get("start_capital", 0) or 0)
 
     kind_rows = "".join(
         f"<tr><td>{html.escape(KIND_LABELS.get(k, k))}</td><td class='num'>{v['total']}</td>"
@@ -331,8 +426,11 @@ def build_report(result: dict, path: str | Path, title: str = "گزارش پس�
  .no {{ color: #b3261e; }}
  .why {{ color: #444; max-width: 300px; }}
  .muted {{ color: #6b7280; font-size: 12.5px; }}
- .warn {{ background: #fff8e1; border: 1px solid #f0e0a8; border-radius: 8px; padding: 10px 12px; font-size: 12.5px; margin-bottom: 12px; }}
- footer {{ margin-top: 20px; font-size: 11.5px; color: #6b7280; }}
+  .warn {{ background: #fff8e1; border: 1px solid #f0e0a8; border-radius: 8px; padding: 10px 12px; font-size: 12.5px; margin-bottom: 12px; }}
+  .chart {{ background: #fff; border: 1px solid #e3e6ea; border-radius: 10px; padding: 10px 12px; margin-top: 10px; }}
+  .chart svg {{ width: 100%; height: auto; display: block; }}
+  .chart-empty {{ background: #fff; border: 1px dashed #cdd2d9; border-radius: 10px; padding: 18px; color: #6b7280; font-size: 13px; text-align: center; margin-top: 10px; }}
+  footer {{ margin-top: 20px; font-size: 11.5px; color: #6b7280; }}
 </style></head><body>
 <header>
   <h1>{html.escape(title)}</h1>
@@ -356,6 +454,9 @@ def build_report(result: dict, path: str | Path, title: str = "گزارش پس�
     <div class="card"><div class="k">سرمایهٔ پایانی</div><div class="v">{_fmt(s['final_equity'], 0)}</div></div>
     <div class="card"><div class="k">تغییر سرمایه</div><div class="v">{_fmt(s['equity_change_pct'], 1, '٪')}</div></div>
   </div>
+
+  <h2>منحنی سرمایه (بعد از هر معاملهٔ تأییدشده)</h2>
+  <div class="chart">{chart}</div>
 
   <h2>تفکیک راهبردها</h2>
   <table><thead><tr><th>راهبرد</th><th>سطر</th><th>ورود</th><th>میانگین انتظاری</th><th>میانگین واقعی</th><th>نرخ برد</th></tr></thead>

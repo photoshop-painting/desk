@@ -862,6 +862,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._serve_file(WEB / "app.js")
         if u.path == "/help.js":
             return self._serve_file(WEB / "help.js")
+        if u.path == "/jalali.js":
+            return self._serve_file(WEB / "jalali.js")
+        if u.path == "/jalali-calendar.js":
+            return self._serve_file(WEB / "jalali-calendar.js")
         if u.path in ("/admin", "/admin.html"):
             return self._serve_file(WEB / "admin.html")
         if u.path == "/admin.js":
@@ -879,7 +883,9 @@ class Handler(BaseHTTPRequestHandler):
                 limit = 500
             entries = audit.read(DATA, limit=limit, user=(q.get("user") or [None])[0] or None,
                                  q=(q.get("search") or [None])[0] or None,
-                                 level=(q.get("level") or [None])[0] or None)
+                                 level=(q.get("level") or [None])[0] or None,
+                                 from_utc=(q.get("from") or [None])[0] or None,
+                                 to_utc=(q.get("to") or [None])[0] or None)
             return self._json({"ok": True, "entries": entries, "count": len(entries),
                                "stats": audit.stats(DATA)})
 
@@ -960,6 +966,18 @@ class Handler(BaseHTTPRequestHandler):
                 if cand.exists():
                     return self._serve_file(cand)
             return self._json({"error": "پروندهٔ خواسته‌شده ساخته نشده است."}, 404)
+
+        # فایل‌های ایستأ تازهٔ پوشه web (js/css و…): بدون تغییرِ فهرستِ بالا،
+        # فقط اگر واقعاً داخلِ همان پوشهٔ وب باشند (نگهبانیِ مسیر همان‌جاست).
+        fname = os.path.basename(u.path)
+        if u.path.count("/") == 1 and "." in fname and fname not in (".", ".."):
+            cand = (WEB / fname).resolve()
+            try:
+                inside = cand.is_relative_to(WEB.resolve())
+            except (OSError, ValueError):
+                inside = False
+            if inside and cand.exists() and cand.is_file() and not fname.startswith("."):
+                return self._serve_file(cand)
 
         return self._json({"error": "مسیر ناشناخته"}, 404)
 

@@ -90,9 +90,17 @@ def write(data_dir: Path, *, user: str = "—", role: str = "—", ip: str = "�
         pass   # لاگِ شکسته نباید درخواست را خراب کند
 
 
+_ISO_DAY_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
+
+
 def read(data_dir: Path, limit: int = 500, user: str | None = None,
-         q: str | None = None, level: str | None = None) -> list[dict]:
-    """ردیف‌های تازه‌تر را (از پایین به بالا) با فیلتر برمی‌گرداند."""
+         q: str | None = None, level: str | None = None,
+         from_utc: str | None = None, to_utc: str | None = None) -> list[dict]:
+    """ردیف‌های تازه‌تر را (از پایین به بالا) با فیلتر برمی‌گرداند.
+
+    from_utc/to_utc: مرزهای UTC به‌صورت ISO («...Z»)؛ from شامل و to شامل نیست.
+    مقادیرِ نامعتبر به‌سادگی نادیده گرفته می‌شوند (فیلترِ خراب نباید لاگ را خالی کند).
+    """
     f = _file(data_dir)
     if not f.exists():
         return []
@@ -100,6 +108,10 @@ def read(data_dir: Path, limit: int = 500, user: str | None = None,
         limit = max(1, min(int(limit), 5000))
     except (TypeError, ValueError):
         limit = 500
+    if from_utc is not None and not _ISO_DAY_RE.match(str(from_utc)):
+        from_utc = None
+    if to_utc is not None and not _ISO_DAY_RE.match(str(to_utc)):
+        to_utc = None
     with _LOCK:
         lines = f.read_text(encoding="utf-8", errors="replace").splitlines()
     out = []
@@ -109,6 +121,11 @@ def read(data_dir: Path, limit: int = 500, user: str | None = None,
         try:
             e = json.loads(raw)
         except json.JSONDecodeError:
+            continue
+        ts = e.get("ts") or ""
+        if from_utc and ts < from_utc:
+            continue
+        if to_utc and ts >= to_utc:
             continue
         if user and e.get("user") != user:
             continue

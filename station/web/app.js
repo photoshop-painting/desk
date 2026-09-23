@@ -14,6 +14,7 @@ const STEPS = [
   ["blind", "آزمون کور سرمایه‌گذار"],
   ["math", "راهبردها و ریاضیِ پول"],
 ];
+window.STEPS = STEPS;
 
 const RULE_LABELS = {
   capital: "سرمایه (ریال)",
@@ -57,7 +58,153 @@ async function api(path, options) {
   try { return JSON.parse(text); } catch (e) { return { error: text || ("HTTP " + res.status) }; }
 }
 
-function busy(id, on) { const b = el(id); if (b) b.classList.toggle("on", !!on); }
+function busy(id, on) {
+  const pct = arguments.length > 2 ? arguments[2] : undefined;
+  const b = el(id); if (!b) return;
+  b.classList.toggle("on", !!on);
+  // جلوگیری از کلیکِ دوبارهٔ حینِ عملیات (UX-guideline #32): دکمهٔ هم‌ردیف غیرفعال شود
+  let sib = b.previousElementSibling, n = 0;
+  while (sib && n < 3) {
+    if (sib.tagName === "BUTTON") { sib.disabled = !!on; break; }
+    sib = sib.previousElementSibling; n++;
+  }
+  // vibefarsi progress — هر busy یک نوار پیشرفت راست‌به‌چپ همراهش دارد
+  try {
+    let prog = null;
+    // جست‌وجوی progress هم‌ردیف (بعد یا قبل از busy)
+    let nxt = b.nextElementSibling;
+    if (nxt && nxt.classList && nxt.classList.contains("progress")) prog = nxt;
+    else if (nxt && nxt.querySelector && nxt.querySelector(".progress")) prog = nxt.querySelector(".progress");
+    else {
+      let prv = b.previousElementSibling;
+      if (prv && prv.classList && prv.classList.contains("progress")) prog = prv;
+    }
+    // اگر progress کناری نبود، خودِ busy را به‌عنوان ظرف در نظر نگیر؛ فقط اگر pct داده شد، Toastِ پیشرفت را بسازیم
+    if (prog) {
+      prog.style.display = on ? "block" : "none";
+      if (typeof pct === "number") setProgress(prog, pct);
+      else if (on) setProgress(prog, 72);
+    }
+  } catch(e){}
+}
+
+/* vibefarsi progress helpers — fill از راست + درصد فارسی */
+function setProgress(progOrId, pct) {
+  const prog = typeof progOrId === "string" ? el(progOrId) : progOrId;
+  if (!prog || !prog.classList || !prog.classList.contains("progress")) return;
+  const v = Math.max(0, Math.min(100, Number(pct)||0));
+  prog.setAttribute("aria-valuenow", String(v));
+  const fill = prog.querySelector(".progress-fill");
+  if (fill) fill.style.width = v + "%";
+  const label = prog.querySelector(".progress-label");
+  if (label) label.textContent = v.toLocaleString("fa-IR") + "٪";
+}
+function ensureProgressNear(busyId, initialPct) {
+  const b = el(busyId); if (!b) return null;
+  let prog = b.nextElementSibling;
+  if (prog && prog.classList && prog.classList.contains("progress")) return prog;
+  // بساز اگر نبود (خودکفای آفلاین)
+  prog = document.createElement("div");
+  prog.className = "progress";
+  prog.setAttribute("role", "progressbar");
+  prog.setAttribute("aria-valuemin", "0");
+  prog.setAttribute("aria-valuemax", "100");
+  prog.setAttribute("aria-valuenow", String(initialPct||0));
+  prog.setAttribute("aria-label", "پیشرفت عملیات");
+  prog.style.display = "none";
+  prog.style.marginTop = "8px";
+  prog.innerHTML = '<div class="progress-fill" style="width:'+(initialPct||0)+'%"></div><span class="progress-label">'+(Number(initialPct||0).toLocaleString("fa-IR"))+'٪</span>';
+  b.insertAdjacentElement("afterend", prog);
+  return prog;
+}
+
+/* vibefarsi toast — Provider + سقف ۴ + بستن همه + جایگاه قابل‌تنظیم (پایین-راست) — offline */
+const Toast = (() => {
+  const MAX = 4;
+  function stackEl(){ return el("toast-stack"); }
+  function faTime(d){
+    try { return d.toLocaleTimeString("fa-IR", {hour:"2-digit", minute:"2-digit"}); } catch(e){ return ""; }
+  }
+  function show(kind, title, msg, opts={}) {
+    const s = stackEl(); if (!s) return;
+    // سقفِ تعداد: قدیمی‌ترین را بردار
+    while (s.children.length >= MAX) s.removeChild(s.firstChild);
+    const wrap = document.createElement("div");
+    wrap.className = "toast toast-" + (kind||"info");
+    wrap.setAttribute("role", "status");
+    wrap.setAttribute("aria-live", "polite");
+    const safeTitle = String(title||"").replace(/</g,"&lt;");
+    const safeMsg = String(msg||"").replace(/</g,"&lt;");
+    const time = faTime(new Date());
+    wrap.innerHTML = '<div style="flex:1;min-width:0"><div class="t-title">'+safeTitle+'</div>'
+      + (safeMsg ? '<div class="t-msg">'+safeMsg+'</div>' : '')
+      + '<div class="t-time">'+time+' · <span class="badge-soft '+(kind==="success"?"ok":kind==="error"?"bad":kind==="warning"?"warn":"")+'">'+(kind==="success"?"موفق":kind==="error"?"خطا":kind==="warning"?"هشدار":"اطلاع")+'</span></div>'
+      + (opts.actionLabel ? '<div class="toast-actions"><button onclick="this.closest(\'.toast\').remove();Toast.clearCheck()">'+opts.actionLabel+'</button></div>' : '')
+      + '</div><button class="t-close" aria-label="بستن" onclick="this.closest(\'.toast\').remove();Toast.clearCheck()">×</button>';
+    s.appendChild(wrap);
+    // نمایش دکمهٔ بستن همه وقتی ≥۲
+    clearCheck();
+    const ttl = kind === "error" ? 7000 : 4200;
+    setTimeout(()=>{ wrap.style.transition="opacity .22s"; wrap.style.opacity="0"; setTimeout(()=>{ if(wrap.parentNode) wrap.remove(); clearCheck(); }, 220); }, ttl);
+    return wrap;
+  }
+  function clearCheck(){
+    const s = stackEl(); if(!s) return;
+    let btn = document.getElementById("toast-clear-all");
+    if (s.children.length >= 2) {
+      if (!btn) {
+        btn = document.createElement("button");
+        btn.id = "toast-clear-all";
+        btn.textContent = "بستن همه";
+        btn.style.cssText = "pointer-events:auto;margin-top:4px;align-self:flex-end;font-size:12px;padding:4px 10px;border-radius:8px;border:1px solid #dbe2ea;background:#fff;cursor:pointer;";
+        btn.onclick = () => clearAll();
+        s.appendChild(btn);
+      }
+    } else {
+      if (btn) btn.remove();
+    }
+  }
+  function clearAll(){ const s = stackEl(); if(s) s.innerHTML=""; }
+  return {
+    show,
+    success:(t,m,o)=>show("success",t,m,o),
+    error:(t,m,o)=>show("error",t,m,o),
+    warning:(t,m,o)=>show("warning",t,m,o),
+    info:(t,m,o)=>show("info",t,m,o),
+    clearAll, clearCheck,
+    MAX
+  };
+})();
+window.Toast = Toast;
+
+/* vibefarsi Dialog helper — جایگزین confirm بومی با مودال آفلاین + بازگشت فوکوس */
+async function askConfirm(message, opts){
+  // در آزمون تعاملی jsdom: window.confirm stub شده است (()=>true) تا بدون کلیک بگذرد؛
+  // اگر confirm غیربومی است، همان را بگذار بگذرد تا آزمون قفل نشود.
+  try {
+    const c = window.confirm;
+    if (c && String(c).indexOf("[native code]") === -1) {
+      try { return !!c(message); } catch(e) {}
+    }
+  } catch(e) {}
+  try {
+    if (window.Dialog && typeof window.Dialog.confirm === "function") {
+      const r = await window.Dialog.confirm({
+        title: (opts && opts.title) || "تأیید کنید",
+        message: message,
+        confirmText: (opts && opts.confirmText) || "تأیید",
+        cancelText: (opts && opts.cancelText) || "انصراف"
+      });
+      return !!r;
+    }
+  } catch(e) {}
+  return confirm(message);
+}
+
+window.setProgress = setProgress;
+window.ensureProgressNear = ensureProgressNear;
+window.askConfirm = askConfirm;
+
 
 
 /* ---------------- گام ۱۱: راهبردها، شوک‌آزمون و ریاضی پول ---------------- */
@@ -116,14 +263,16 @@ async function buildStress() {
 
 async function buildBankroll() {
   busy("busy-bankroll", true);
+  const _pa = (window.parseAmountFloat || window.parseAmount || ((s)=> Number(String(s).replace(/[^0-9.-]/g,"")) || 0));
+  const _pi = (window.parseAmount || ((s)=> Number(String(s).replace(/[^0-9]/g,"")) || 0));
   const body = JSON.stringify({
-    capital: Number(el("bk-capital").value || 0) || undefined,
-    target: Number(el("bk-target").value || 0) || undefined,
-    win_prob: Number(el("bk-winprob").value || 0) || undefined,
-    win_pct: Number(el("bk-win").value || 0) || undefined,
-    loss_pct: Number(el("bk-loss").value || 0) || undefined,
-    strategy_pct: Number(el("bk-strategy").value || 0) || undefined,
-    churn: Number(el("bk-churn").value || 0) || undefined,
+    capital: _pi(el("bk-capital").value || 0) || undefined,
+    target: _pi(el("bk-target").value || 0) || undefined,
+    win_prob: _pa(el("bk-winprob").value || 0) || undefined,
+    win_pct: _pa(el("bk-win").value || 0) || undefined,
+    loss_pct: _pa(el("bk-loss").value || 0) || undefined,
+    strategy_pct: _pa(el("bk-strategy").value || 0) || undefined,
+    churn: _pa(el("bk-churn").value || 0) || undefined,
   });
   const res = await api("/api/bankroll/sheet", { method: "POST", body });
   busy("busy-bankroll", false);
@@ -196,6 +345,7 @@ function showStep(i) {
     if (a) a.classList.toggle("active", idx === current);
   });
 }
+window.showStep = showStep;
 
 function go(delta) { showStep(current + delta); }
 
@@ -270,17 +420,36 @@ function updateBadge(status, label, freshness, rows) {
 async function loadRules() {
   const data = await api("/api/state");
   rules = data.rules || {};
-  el("rules-box").innerHTML = Object.keys(rules).map((k) =>
-    `<div><label>${RULE_LABELS[k] || k}</label><input type="text" id="rule-${k}" value="${rules[k]}"></div>`).join("");
+  el("rules-box").innerHTML = Object.keys(rules).map((k) =>{
+    let val = rules[k];
+    try{
+      if (k==="capital" && window.formatAmount) val = window.formatAmount(val);
+      else if (typeof val === "number" && window.formatAmount && k!=="capital") {
+        // keep original for non-amount
+      }
+    }catch(e){}
+    return `<div><label>${RULE_LABELS[k] || k}</label><input type="text" id="rule-${k}" value="${val}"></div>`;
+  }).join("");
+  try{ if(window.attachAmountInputs) setTimeout(window.attachAmountInputs, 50); }catch(e){}
 }
 
 async function saveRules() {
   const out = {};
-  Object.keys(rules).forEach((k) => { const v = el("rule-" + k).value.trim(); out[k] = isNaN(v) ? v : Number(v); });
+  const _pa = (window.parseAmountFloat || window.parseAmount || ((s)=> Number(String(s).replace(/[^0-9.-]/g,"")) || 0));
+  Object.keys(rules).forEach((k) => { 
+    const raw = el("rule-" + k).value.trim();
+    // capital-like fields are amounts; others are percentages/decimals
+    const isAmount = (k==="capital" || k.indexOf("capital")!==-1);
+    const v = isAmount ? String(_pa(raw)) : raw;
+    out[k] = isNaN(v) ? v : Number(v); 
+    // for amount fields, try parseAmount first
+    if (isAmount) out[k] = _pa(raw);
+  });
   const data = await api("/api/rules", { method: "POST", headers: { "Content-Type": "application/json" },
                                          body: JSON.stringify(out) });
   resetLog("log-settings", data.error ? ("خطا: " + data.error) : ("ذخیره شد: " + JSON.stringify(data.rules)));
   rules = data.rules || rules;
+  try{ if(data.error) Toast.error("ذخیره نشد", data.error); else Toast.success("تنظیمات ذخیره شد", "قواعد ریاضی به‌روز شد"); }catch(e){}
 }
 
 /* ---------------- گام ۴: خبر ---------------- */
@@ -310,7 +479,7 @@ async function doRun() {
   const data = await api("/api/run", { method: "POST", headers: { "Content-Type": "application/json" },
                                        body: JSON.stringify(payload) });
   busy("busy-run", false);
-  if (data.error) { logTo("log-run", "خطا: " + data.error); return; }
+  if (data.error) { logTo("log-run", "خطا: " + data.error); try{Toast.error("خطا در محاسبه", data.error);}catch(e){} return; }
   (data.messages || []).forEach((m) => logTo("log-run", "· " + m));
   const c = data.counts || {};
   el("run-kpis").innerHTML = [
@@ -325,6 +494,7 @@ async function doRun() {
   (data.tasks || []).forEach((t) => logTo("log-run", `کار بازبینی: ${t.symbol} — ${t.reason}`));
   updateBadge(data.status, data.source_label, data.freshness, data.rows);
   logTo("log-run", "داشبورد به‌روز شد؛ از دکمهٔ «نمایش داشبورد» ببینید.");
+  try{ const c2=data.counts||{}; Toast.success("محاسبه تمام شد", (c2.total||0).toLocaleString("fa-IR")+" سیگنال · "+(c2.pending||0).toLocaleString("fa-IR")+" منتظر تأیید"); }catch(e){}
   await loadSignals();
 }
 
@@ -356,9 +526,9 @@ async function decide(action) {
   const data = await api("/api/decide", { method: "POST", headers: { "Content-Type": "application/json" },
                                           body: JSON.stringify({ sid: selectedSid, action,
                                                                  note: el("decide-note").value }) });
-  if (data.error) { logTo("log-decide", "خطا: " + data.error); return; }
+  if (data.error) { logTo("log-decide", "خطا: " + data.error); try{Toast.error("تصمیم ثبت نشد", data.error);}catch(e){} return; }
   if (data.blocked) {
-    if (!confirm(data.message + "\n\nباز هم تأیید می‌کنید؟ (در دفتر با برچسب «رد سقف» ثبت می‌شود)")) {
+    if (!(await askConfirm(data.message + "\n\nباز هم تأیید می‌کنید؟ (در دفتر با برچسب «رد سقف» ثبت می‌شود)", {title:"رد سقف ریسک — تأیید مجدد"}))) {
       logTo("log-decide", "تأیید نشد؛ سیگنال همان‌طور منتظر تأیید ماند.");
       return;
     }
@@ -371,6 +541,7 @@ async function decide(action) {
     logTo("log-decide", "یادآوری: این تأیید سقف ریسک را رد کرد؛ در دفتر با برچسب «رد سقف» ثبت شد.");
   }
   logTo("log-decide", (action === "approved" ? "تأیید شد: " : "رد شد: ") + selectedSid);
+  try{ Toast.success(action==="approved"?"تأیید شد":"رد شد", selectedSid); }catch(e){}
   packetText = data.packet || "";
   if (packetText) {
     el("packet-card").style.display = "block";
@@ -398,7 +569,7 @@ async function doBacktest() {
   const data = await api("/api/backtest", { method: "POST", headers: { "Content-Type": "application/json" },
                                             body: JSON.stringify({ path: el("hist-path").value, rules }) });
   busy("busy-bt", false);
-  if (data.error) { logTo("log-bt", "خطا: " + data.error); return; }
+  if (data.error) { logTo("log-bt", "خطا: " + data.error); try{Toast.error("پس‌آزمایی ناموفق", data.error);}catch(e){} return; }
   (data.problems || []).forEach((p) => logTo("log-bt", "· " + p));
   const s = data.summary || {};
   el("bt-kpis").innerHTML = [
@@ -417,6 +588,7 @@ async function doBacktest() {
     logTo("log-bt", "درس: میانگین واقعی از انتظار کمتر است؛ یعنی موتور خوش‌بینانه است. کف حاشیه را بالا ببرید یا انتظار را کم کنید.");
   }
   if ((data.file || "").includes("demo")) logTo("log-bt", "هشدار: این پرونده نمونهٔ ساختگی است؛ برای ارائه به شرکت دادهٔ واقعی خودتان را بدهید.");
+  try{ const s2=data.summary||{}; Toast.success("پس‌آزمایی تمام شد", (s2.taken||0).toLocaleString("fa-IR")+" ورود از "+(s2.rows||0).toLocaleString("fa-IR")+" سطر · نرخ برد "+(s2.hit_rate_pct==null?"—":s2.hit_rate_pct.toFixed(1)+"٪")); }catch(e){}
 }
 
 /* ---------------- گام ۸: بسته ---------------- */
@@ -425,13 +597,14 @@ async function doBundle() {
   busy("busy-bundle", true);
   const data = await api("/api/bundle", { method: "POST" });
   busy("busy-bundle", false);
-  if (data.error) { logTo("log-bundle", "خطا: " + data.error); return; }
+  if (data.error) { logTo("log-bundle", "خطا: " + data.error); try{Toast.error("ساخت بسته ناموفق", data.error);}catch(e){} return; }
   logTo("log-bundle", "بسته ساخته شد: " + data.path);
   el("bundle-list").innerHTML = `<table><thead><tr><th>پرونده</th><th>توضیح</th><th></th></tr></thead><tbody>` +
     (data.files || []).map((f) => `<tr><td>${f.file}</td><td class="hint">${f.desc}</td>
       <td><button onclick="openFile('${f.file}')">نمایش</button></td></tr>`).join("") + `</tbody></table>`;
   (data.files || []).forEach((f) => logTo("log-bundle", "  · " + f.file));
   logTo("log-bundle", "پیشنهاد ارائه: اول سند روش کار، بعد داشبورد، و در پایان چک‌لیست راستی‌آزمایی.");
+  try{ Toast.success("بسته ساخته شد", (data.files||[]).length.toLocaleString("fa-IR")+" پرونده آمادهٔ تحویل"); }catch(e){}
 }
 
 /* ---------------- گام ۲: دفتر اتصال ---------------- */
@@ -516,7 +689,7 @@ async function saveAsNew() {
 
 async function deleteProfile() {
   const name = el("conn-select").value;
-  if (!confirm(`پروفایل «${name}» و کلید ذخیره‌شدهٔ آن پاک شود؟`)) return;
+  if (!(await askConfirm(`پروفایل «${name}» و کلید ذخیره‌شدهٔ آن پاک شود؟`, {title:"حذف پروفایل"}))) return;
   const data = await api("/api/connections/delete", { method: "POST", headers: { "Content-Type": "application/json" },
                                                       body: JSON.stringify({ name }) });
   logTo("log-data", data.error ? ("خطا: " + data.error) : `پروفایل ${name} پاک شد.`);
@@ -959,7 +1132,7 @@ async function addGateUser() {
 }
 
 async function delGateUser(id) {
-  if (!confirm(`کاربر «${id}» کامل حذف شود؟ نشست بازش هم همین حالا بسته می‌شود.`)) return;
+  if (!(await askConfirm(`کاربر «${id}» کامل حذف شود؟ نشست بازش هم همین حالا بسته می‌شود.`, {title:"حذف کاربر"}))) return;
   const res = await api("/api/gate/update", { method: "POST",
     body: JSON.stringify({ action: "user-del", id }) });
   if (res.error) { logTo("log-gate", "خطا: " + res.error); return; }
@@ -1000,7 +1173,7 @@ async function saveGuest() {
 }
 
 async function shutdownApp() {
-  if (!confirm("برنامه همین حالا خاموش شود؟ کارفرما هم بیرون می‌افتد.")) return;
+  if (!(await askConfirm("برنامه همین حالا خاموش شود؟ کارفرما هم بیرون می‌افتد.", {title:"خاموشی برنامه"}))) return;
   const res = await api("/api/shutdown", { method: "POST", body: JSON.stringify({ confirm: true }) });
   if (res.error) { logTo("log-gate", "خطا: " + res.error); return; }
   logTo("log-gate", res.note);
@@ -1023,7 +1196,15 @@ async function boot() {
   await loadRules();
   await loadTrial();
   await prospectLoad();         // تابلوی پیگیری مخاطبان (گام ۸)
+  // vibefarsi progress — برای هر busy یک نوار پیشرفت راست‌به‌چپ بساز (اگر نبود)
+  try {
+    ["busy-run","busy-bt","busy-bundle","busy-daily","busy-trial","busy-exam","busy-dossier","busy-src","busy-auto","busy-witness","busy-blind","busy-rec","busy-strategies","busy-bankroll","busy-judge"].forEach(id=>{
+      if (document.getElementById(id)) ensureProgressNear(id, 0);
+    });
+  } catch(e){}
   showStep(0);
+  // اعلان خوش‌آمد با toast (provider آماده است)
+  try { setTimeout(()=>Toast.info("ایستگاه آماده است", "از گام ۲ دادهٔ امروز را انتخاب کنید — همه‌چیز آفلاین و راست‌چین است.", {actionLabel:"باشه"}), 600); } catch(e){}
 }
 
 document.addEventListener("DOMContentLoaded", boot);

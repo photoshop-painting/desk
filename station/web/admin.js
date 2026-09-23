@@ -297,6 +297,45 @@ async function openAdminFile(key) {
 
 /* ------------------------------------------- ۵. لاگ‌ها (ممیزی) */
 
+/* تاریخِ انتخاب‌شده به‌شکلِ «1405/7/1» (ارقامِ لاتین، بر اساسِ مهارتِ jalali-calendar) نگه داشته
+ * می‌شود و برای نمایش فارسی می‌شود. بازهٔ «از/تا» به مرزهای UTCِ روزهای تهران تبدیل می‌شود. */
+function auditRange() {
+  const el = $("audit-range");
+  const from = el.dataset.j || null;
+  const to = el.dataset.t || null;
+  if (from && to && JalaliCal.diffDays(JalaliCal.parse(from), JalaliCal.parse(to)) < 0) return null;
+  return { from, to };
+}
+function auditRangeUi() {
+  const el = $("audit-range");
+  const r = auditRange();
+  if (r && r.from && r.to) {
+    const a = JalaliCal.parse(r.from), b = JalaliCal.parse(r.to);
+    const days = JalaliCal.diffDays(a, b) + 1;
+    el.value = `از ${JalaliCal.fmt(a)} تا ${JalaliCal.fmt(b)} · ${Jalali.faNum(days)} روز`;
+  } else el.value = "";
+}
+/* بازهٔ تاریخ با کامپوننتِ دو ماهه: کلیکِ اول «از»، دوم «تا» (specِ date-range-picker). */
+function openAuditRange() {
+  const el = $("audit-range");
+  const r = auditRange() || { from: null, to: null };
+  JalaliCal.openRange(el, {
+    from: r.from ? JalaliCal.parse(r.from) : null,
+    to: r.to ? JalaliCal.parse(r.to) : null,
+    onDone: (f, t) => {
+      el.dataset.j = f ? f.join("/") : "";
+      el.dataset.t = t ? t.join("/") : "";
+      auditRangeUi();
+    },
+    onClear: () => {
+      el.dataset.j = "";
+      el.dataset.t = "";
+      auditRangeUi();
+    }
+  });
+}
+window.openAuditRange = openAuditRange;
+
 async function loadAudit() {
   const user = $("audit-user").value;
   const search = $("audit-search").value.trim();
@@ -306,6 +345,15 @@ async function loadAudit() {
   if (user) qs.set("user", user);
   if (search) qs.set("search", search);
   if (level) qs.set("level", level);
+  const r = auditRange();
+  if (r && r.from) {
+    const b = JalaliCal.tehranDayUtc(...JalaliCal.parse(r.from));
+    qs.set("from", b.fromIso);
+  }
+  if (r && r.to) {
+    const b = JalaliCal.tehranDayUtc(...JalaliCal.parse(r.to));
+    qs.set("to", b.toIso);
+  }
   try {
     const r = await fetch("/api/admin/audit?" + qs.toString(),
       { headers: { "X-Admin-Token": token() } });
@@ -320,12 +368,24 @@ async function loadAudit() {
         : "";
       const err = e.error ? `<div style="color:#b3261e;font-size:12px;white-space:pre-wrap">${e.error.slice(0, 300)}</div>` : "";
       const stColor = (e.status >= 500) ? "#b3261e" : (e.status === 401 || e.status === 403) ? "#b45309" : "#0a7d33";
+      const tsFa = (window.Jalali && e.ts)
+        ? `<span title="UTC: ${e.ts}">${Jalali.fmt(e.ts)}</span>`
+        : (e.ts || "—");
       tr.innerHTML =
-        `<td style="white-space:nowrap">${e.ts}</td>` +
+        `<td style="white-space:nowrap">${tsFa}</td>` +
         `<td>${e.user}</td><td>${e.role}</td>` +
         `<td>${e.method} ${e.path}${e.action && e.action !== e.path ? `<div class="hint">${e.action}</div>` : ""}</td>` +
         `<td>${det}${err}</td>` +
         `<td style="color:${stColor};font-weight:bold;white-space:nowrap">${e.status} · ${e.ms}ms</td>`;
+      tb.appendChild(tr);
+    }
+    if (!d.entries.length) {
+      // حالتِ خالی (specِ empty-state): وضعیت + قدمِ بعدی، نه صفحهٔ صاف
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td colspan="6" style="text-align:center;padding:26px 10px">
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">هیچ ردیفی در این فیلترها نیست</div>
+        <div class="hint">بازهٔ تاریخ را گسترده‌تر کنید یا «جست‌وجو/سطح/کاربر» را خالی کنید؛
+        اگر تازه کار کرده‌اید، همان کار همین حالا باید اینجا ثبت باشد.</div></td>`;
       tb.appendChild(tr);
     }
     const s = d.stats;

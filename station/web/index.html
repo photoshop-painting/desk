@@ -9,7 +9,7 @@
           --ok:#0a7d33; --bad:#b3261e; --warnbg:#fff8e1; --warnline:#f0e0a8; }
   * { box-sizing: border-box; }
   body { margin:0; background:var(--bg); color:var(--ink);
-         font-family: Tahoma, "Segoe UI", Vazirmatn, "Noto Naskh Arabic", sans-serif; line-height:1.9; }
+         font-family:"Vazirmatn","IRANSans","Segoe UI",Tahoma,"Noto Naskh Arabic",sans-serif; line-height:1.9; }
   header { background:var(--green); color:#fff; padding:14px 20px; }
   header h1 { margin:0 0 4px; font-size:19px; }
   header .meta { font-size:12px; opacity:.9; }
@@ -74,6 +74,288 @@
   iframe { width:100%; height:640px; border:1px solid var(--line); border-radius:10px; background:#fff; }
   .busy { display:none; }
   .busy.on { display:inline-block; }
+  /* vibefarsi toast · stacked, max 4, clear-all, provider/hook — offline */
+  .toast-stack { position:fixed; bottom:16px; inset-inline-end:16px; z-index:9999; display:flex; flex-direction:column; gap:8px; max-width:376px; pointer-events:none; }
+  .toast { pointer-events:auto; background:#fff; border:1px solid var(--line); border-radius:12px; padding:10px 12px; box-shadow:0 8px 24px rgba(0,0,0,.12); display:flex; gap:10px; align-items:flex-start; animation:toast-in .22s ease; }
+  @keyframes toast-in { from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none} }
+  .toast-success { border-color:#b7e2c6; background:#e6f6ec; }
+  .toast-error { border-color:#f3c3bd; background:#fdecea; }
+  .toast-warning { border-color:#f0e0a8; background:var(--warnbg); }
+  .toast-info { border-color:#cdd8f0; background:#eef2ff; }
+  .toast .t-title { font-size:13px; font-weight:bold; line-height:1.6; }
+  .toast .t-msg { font-size:12.5px; color:#374151; line-height:1.7; }
+  .toast .t-time { font-size:11px; color:var(--muted); }
+  .toast .t-close { margin-inline-start:auto; background:transparent; border:0; cursor:pointer; font-size:18px; line-height:1; padding:2px 6px; color:var(--muted); }
+  .toast .t-close:hover { color:var(--ink); }
+  .toast-actions { display:flex; gap:6px; margin-top:6px; flex-wrap:wrap; }
+  /* vibefarsi progress · از راست پر می‌شود + درصد فارسی */
+  .progress { position:relative; height:14px; background:#eef2f7; border:1px solid #dbe2ea; border-radius:999px; overflow:hidden; direction:rtl; }
+  .progress-fill { position:absolute; top:0; right:0; inset-inline-end:0; height:100%; width:0; background:linear-gradient(90deg,#0b3d2e,#0f766e); border-radius:999px; transition:width .35s ease; transform-origin:right; }
+  .progress-label { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:11px; font-variant-numeric: tabular-nums; color:#0b3d2e; font-weight:bold; }
+  /* vibefarsi kbd · همیشه ltr */
+  kbd, .kbd { font-family:Consolas,monospace; font-size:11.5px; background:#f3f4f6; border:1px solid #d1d5db; border-bottom-width:2px; border-radius:5px; padding:1px 6px; direction:ltr; display:inline-block; unicode-bidi:plaintext; }
+  /* vibefarsi badge · برچسب وضعیت */
+  .badge-soft { display:inline-block; font-size:11px; padding:1px 8px; border-radius:999px; border:1px solid #dbe2ea; background:#f8fafc; color:#334155; }
+  .badge-soft.ok { background:#e6f6ec; border-color:#b7e2c6; color:#0a7d33; }
+  .badge-soft.bad { background:#fdecea; border-color:#f3c3bd; color:#b3261e; }
+  .badge-soft.warn { background:#fff8e1; border-color:#f0e0a8; color:#8a6d00; }
+  /* vibefarsi skeleton · ضربان تا رسیدن داده */
+  .skeleton { background:linear-gradient(90deg,#eef2f7 25%,#e3e8ef 37%,#eef2f7 63%); background-size:400% 100%; animation:skeleton-shimmer 1.4s ease infinite; border-radius:8px; height:14px; }
+  @keyframes skeleton-shimmer { 0%{background-position:100% 0} 100%{background-position:-100% 0} }
+  /* vibefarsi dialog · مودال با عنوان/بدنه/دکمه‌های عمل در جای درست + قفل اسکرول + بازگشت فوکوس */
+  .dialog-overlay { position:fixed; inset:0; background:rgba(15,23,42,.55); backdrop-filter:blur(2px); z-index:9998; }
+  .dialog { position:fixed; inset:50% auto auto 50%; transform:translate(-50%,-50%); max-width:520px; width:calc(100% - 32px); background:#fff; border-radius:14px; box-shadow:0 20px 60px rgba(0,0,0,.22); z-index:9999; display:flex; flex-direction:column; max-height:calc(100vh - 40px); overflow:hidden; }
+  .dialog-head { background:var(--green); color:#fff; padding:12px 18px; display:flex; justify-content:space-between; align-items:center; }
+  .dialog-body { padding:14px 18px; overflow:auto; line-height:1.9; font-size:13.5px; }
+  .dialog-foot { padding:12px 18px; background:#f6f7f9; border-top:1px solid var(--line); display:flex; gap:8px; justify-content:flex-end; }
+  /* vibefarsi alert · پیام درون‌صفحه برای اطلاع/موفقیت/هشدار/خطا */
+  .alert { border-radius:10px; padding:10px 12px; border:1px solid; font-size:13px; line-height:1.8; }
+  .alert-info { background:#eef2ff; border-color:#cdd8f0; color:#3730a3; }
+  .alert-success { background:#e6f6ec; border-color:#b7e2c6; color:#0a7d33; }
+  .alert-warning { background:#fff8e1; border-color:#f0e0a8; color:#8a6d00; }
+  .alert-error { background:#fdecea; border-color:#f3c3bd; color:#b3261e; }
+  /* vibefarsi tooltip · فقط CSS hover/focus */
+  .tooltip { position:relative; }
+  .tooltip[data-tip]:hover::after, .tooltip[data-tip]:focus::after { content:attr(data-tip); position:absolute; bottom:calc(100% + 8px); inset-inline-start:50%; transform:translateX(-50%); background:#0f172a; color:#fff; font-size:11.5px; padding:6px 9px; border-radius:8px; white-space:nowrap; z-index:50; }
+  /* vibefarsi dropdown-menu · منوی کشویی با جداکننده و آیتم خطر */
+  .dropdown { position:relative; display:inline-block; }
+  .dropdown-trigger { font:inherit; font-size:13px; padding:6px 12px; border-radius:9px; border:1px solid #bcd8cd; background:#eaf5f0; cursor:pointer; }
+  .dropdown-menu { position:absolute; top:calc(100% + 6px); inset-inline-end:0; min-width:190px; background:#fff; border:1px solid var(--line); border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,.14); padding:6px; z-index:9996; display:none; }
+  .dropdown-menu.open { display:block; }
+  .dropdown-item { display:flex; align-items:center; justify-content:space-between; padding:8px 10px; border-radius:8px; font-size:13px; cursor:pointer; border:0; background:transparent; width:100%; text-align:right; }
+  .dropdown-item:hover, .dropdown-item[aria-selected=true] { background:#f2f8f5; }
+  .dropdown-item.danger { color:#b3261e; }
+  .dropdown-item.danger:hover { background:#fdecea; }
+  .dropdown-sep { height:1px; background:var(--line); margin:4px 0; }
+  /* vibefarsi command · پالت دستور ⌘K */
+  .command-overlay { position:fixed; inset:0; background:rgba(15,23,42,.45); backdrop-filter:blur(2px); z-index:9998; display:none; }
+  .command-overlay.open { display:block; }
+  .command-box { position:fixed; top:18vh; inset-inline-start:50%; transform:translateX(-50%); width:min(540px, calc(100% - 32px)); background:#fff; border-radius:14px; box-shadow:0 20px 60px rgba(0,0,0,.22); z-index:9999; display:none; overflow:hidden; border:1px solid var(--line); }
+  .command-box.open { display:block; }
+  .command-input { width:100%; border:0; border-bottom:1px solid var(--line); padding:12px 14px; font:inherit; font-size:13.5px; outline:0; direction:rtl; }
+  .command-list { max-height:340px; overflow:auto; padding:6px; }
+  .command-item { padding:9px 10px; border-radius:8px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; font-size:13px; border:1px solid transparent; }
+  .command-item[aria-selected=true] { background:#eef2f7; border-color:#dbe2ea; }
+  .command-item .cmd-kbd { font:11.5px Consolas,monospace; border:1px solid #dbe2ea; border-bottom-width:2px; border-radius:5px; padding:1px 6px; background:#f6f7f9; direction:ltr; unicode-bidi:plaintext; }
+  .command-empty { padding:18px; text-align:center; color:var(--muted); font-size:13px; }
+  /* vibefarsi amount-input · ورودی مبلغ با جداکننده هزارگان، واحد و مبلغ به حروف */
+  .amount-wrap { position:relative; display:block; }
+  .amount-input { direction:ltr; text-align:right; font-variant-numeric:tabular-nums; padding-inline-end:52px !important; }
+  .amount-unit { position:absolute; inset-inline-end:10px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:12px; pointer-events:none; }
+  .amount-words { font-size:11.5px; color:var(--muted); margin-top:4px; min-height:16px; line-height:1.6; }
+  .amount-quick { display:flex; gap:4px; flex-wrap:wrap; margin-top:6px; }
+  .amount-quick button { font-size:11px; padding:3px 8px; border-radius:999px; background:#eef2f7; border:1px solid #dbe2ea; cursor:pointer; }
+  .amount-quick button:hover { background:#e2efe9; }
+  /* vibefarsi number-field · دکمه‌های + / - با اعداد فارسی */
+  .number-field { display:inline-flex; align-items:center; border:1px solid var(--line); border-radius:9px; overflow:hidden; background:#fff; }
+  .number-field button { border:0; background:#f6f7f9; width:28px; height:32px; cursor:pointer; font-size:14px; line-height:1; }
+  .number-field input { border:0; width:88px; text-align:center; direction:ltr; font-variant-numeric:tabular-nums; outline:0; }
+  /* vibefarsi price · نمایش قیمت با جداکننده و واحد */
+  .price { font-variant-numeric:tabular-nums; direction:ltr; display:inline-block; unicode-bidi:plaintext; }
+  .price .price-unit { color:var(--muted); font-size:0.92em; margin-inline-start:4px; }
+  /* vibefarsi search-input · ذره‌بین + پاک‌کن + debounce + ⌘K */
+  .search-wrap { position:relative; display:block; max-width:520px; }
+  .search-wrap input.search-input { width:100%; padding:8px 38px 8px 34px !important; border:1px solid var(--line); border-radius:9px; background:#fff; font:inherit; font-size:13px; outline:0; direction:rtl; }
+  .search-wrap .search-icon { position:absolute; inset-inline-start:10px; top:50%; transform:translateY(-50%); color:var(--muted); pointer-events:none; font-size:14px; }
+  .search-wrap .search-clear { position:absolute; inset-inline-end:8px; top:50%; transform:translateY(-50%); border:0; background:transparent; cursor:pointer; color:var(--muted); font-size:16px; line-height:1; padding:2px 6px; display:none; border-radius:6px; }
+  .search-wrap .search-clear.show { display:block; }
+  .search-wrap .search-clear:hover { background:#f3f4f6; color:var(--ink); }
+  .search-wrap .search-kbd { position:absolute; inset-inline-end:36px; top:50%; transform:translateY(-50%); pointer-events:none; }
+  /* vibefarsi tags-input · چیپ با Enter/ویرگول، جلوگیری از تکراری، paste */
+  .tags-input { display:flex; flex-wrap:wrap; gap:6px; align-items:center; min-height:42px; padding:6px 8px; border:1px solid var(--line); border-radius:9px; background:#fff; cursor:text; max-width:520px; }
+  .tags-input:focus-within { border-color:#bcd8cd; box-shadow:0 0 0 3px #eaf5f0; }
+  .tags-input input { border:0; outline:0; flex:1; min-width:90px; font:inherit; font-size:13px; direction:rtl; background:transparent; }
+  .tag-chip { display:inline-flex; align-items:center; gap:6px; background:#eef2f7; border:1px solid #dbe2ea; border-radius:999px; padding:3px 9px; font-size:12.5px; line-height:1.6; }
+  .tag-chip button { border:0; background:transparent; cursor:pointer; color:var(--muted); padding:0 2px; font-size:14px; line-height:1; }
+  .tag-chip button:hover { color:var(--bad); }
+  .tags-hint { font-size:11.5px; color:var(--muted); margin-top:4px; }
+  /* vibefarsi multi-select · چیپ داخل فیلد + فهرست تیک‌دار */
+  .multi-select { position:relative; max-width:520px; }
+  .multi-select-trigger { display:flex; flex-wrap:wrap; gap:6px; align-items:center; min-height:42px; padding:6px 8px; border:1px solid var(--line); border-radius:9px; background:#fff; cursor:pointer; }
+  .multi-select-trigger:focus-within, .multi-select.open .multi-select-trigger { border-color:#bcd8cd; box-shadow:0 0 0 3px #eaf5f0; }
+  .multi-select-trigger input { border:0; outline:0; flex:1; min-width:80px; font:inherit; font-size:13px; direction:rtl; background:transparent; }
+  .multi-select-dropdown { position:absolute; top:calc(100% + 6px); inset-inline:0; background:#fff; border:1px solid var(--line); border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,.12); z-index:9995; max-height:220px; overflow:auto; display:none; padding:6px; }
+  .multi-select.open .multi-select-dropdown { display:block; }
+  .multi-opt { display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:8px; cursor:pointer; font-size:13px; }
+  .multi-opt:hover, .multi-opt[aria-selected=true] { background:#eef2f7; }
+  .multi-opt input[type=checkbox] { width:16px; height:16px; accent-color:var(--green); }
+  .multi-more { font-size:11.5px; color:var(--muted); margin-top:4px; }
+
+  /* vibefarsi iran-validation · phone/iban/national-id/card/plate — گروه‌بندی + اعتبارسنجی فارسی */
+  .iran-field { position:relative; display:block; max-width:520px; }
+  .iran-field input { width:100%; padding:8px 12px; border:1px solid var(--line); border-radius:9px; background:#fff; font:inherit; font-size:13px; direction:ltr; text-align:right; font-variant-numeric:tabular-nums; outline:0; }
+  .iran-field input:focus { border-color:#bcd8cd; box-shadow:0 0 0 3px #eaf5f0; }
+  .iran-field input.invalid { border-color:#f3c3bd; background:#fef2f2; }
+  .iran-field input.valid { border-color:#b7e2c6; background:#e6f6ec; }
+  .iran-prefix { position:absolute; inset-inline-start:10px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:12px; pointer-events:none; direction:ltr; }
+  .iran-hint { font-size:11.5px; color:var(--muted); margin-top:3px; min-height:16px; line-height:1.7; }
+  .iran-hint.ok { color:var(--ok); } .iran-hint.bad { color:var(--bad); }
+  .plate-wrap { display:flex; gap:6px; align-items:center; max-width:420px; border:1px solid var(--line); border-radius:9px; background:#fff; padding:6px 8px; }
+  .plate-wrap input { border:0; outline:0; font:inherit; font-size:13px; text-align:center; width:52px; background:transparent; }
+  .plate-wrap .plate-sep { color:var(--muted); }
+  .plate-wrap select { border:0; background:#eef2f7; border-radius:6px; padding:4px 6px; font-size:13px; }
+
+  /* vibefarsi form-controls · slider/switch/rating/file-upload/password — از راست/RTL */
+  .switch { display:inline-flex; align-items:center; gap:8px; cursor:pointer; user-select:none; }
+  .switch input { appearance:none; -webkit-appearance:none; width:44px; height:26px; background:#e5e7eb; border-radius:999px; position:relative; cursor:pointer; transition:background .2s; border:0; flex:0 0 auto; }
+  .switch input:checked { background:var(--green); }
+  .switch input::after { content:""; position:absolute; width:20px; height:20px; background:#fff; border-radius:50%; top:3px; inset-inline-start:3px; transition:transform .22s; box-shadow:0 1px 3px rgba(0,0,0,.2); }
+  .switch input:checked::after { transform:translateX(18px); }
+  [dir="rtl"] .switch input:checked::after { transform:translateX(-18px); }
+  .slider { position:relative; height:8px; background:#eef2f7; border:1px solid #dbe2ea; border-radius:999px; direction:rtl; margin:10px 0; cursor:pointer; }
+  .slider-fill { position:absolute; top:0; inset-inline-end:0; height:100%; background:linear-gradient(90deg,#0b3d2e,#0f766e); border-radius:999px; pointer-events:none; }
+  .slider-thumb { position:absolute; top:50%; width:18px; height:18px; background:#fff; border:2px solid var(--green); border-radius:50%; transform:translate(50%,-50%); box-shadow:0 1px 4px rgba(0,0,0,.12); pointer-events:none; }
+  .rating { display:inline-flex; gap:2px; direction:rtl; }
+  .rating button { background:transparent; border:0; cursor:pointer; font-size:22px; line-height:1; color:#e5e7eb; padding:2px; transition:color .15s, transform .1s; }
+  .rating button.filled { color:#f59e0b; }
+  .rating button:hover { transform:scale(1.12); }
+  .file-drop { border:2px dashed #dbe2ea; border-radius:12px; padding:18px; text-align:center; background:#f8fafc; cursor:pointer; transition:background .15s, border-color .15s; max-width:520px; }
+  .file-drop.dragover { background:#eaf5f0; border-color:#bcd8cd; }
+  .file-list { margin-top:8px; display:flex; flex-direction:column; gap:6px; max-width:520px; }
+  .file-item { display:flex; justify-content:space-between; align-items:center; background:#fff; border:1px solid var(--line); border-radius:8px; padding:6px 10px; font-size:12.5px; }
+  .password-wrap { position:relative; display:block; max-width:520px; }
+  .password-wrap input { width:100%; padding:8px 10px 8px 38px !important; border:1px solid var(--line); border-radius:9px; font:inherit; font-size:13px; direction:ltr; text-align:right; outline:0; }
+  .password-wrap input:focus { border-color:#bcd8cd; box-shadow:0 0 0 3px #eaf5f0; }
+  .password-toggle { position:absolute; inset-inline-end:8px; top:50%; transform:translateY(-50%); border:0; background:transparent; cursor:pointer; color:var(--muted); font-size:14px; padding:4px 6px; border-radius:6px; }
+  .password-toggle:hover { background:#f3f4f6; }
+  .strength { height:4px; border-radius:999px; background:#eef2f7; overflow:hidden; margin-top:6px; max-width:520px; }
+  .strength-fill { height:100%; width:0; transition:width .3s, background .3s; }
+  .strength-label { font-size:11.5px; color:var(--muted); margin-top:3px; }
+
+  /* vibefarsi select/combobox/checkbox-group/radio-group/segmented — انتخاب‌ها */
+  .select-wrap { position:relative; display:block; max-width:320px; }
+  .select-wrap select { width:100%; appearance:none; -webkit-appearance:none; padding:8px 12px 8px 30px; border:1px solid var(--line); border-radius:9px; background:#fff; font:inherit; font-size:13px; outline:0; cursor:pointer; }
+  .select-wrap select:focus { border-color:#bcd8cd; box-shadow:0 0 0 3px #eaf5f0; }
+  .select-wrap::after { content:"▾"; position:absolute; inset-inline-end:12px; top:50%; transform:translateY(-50%); color:var(--muted); pointer-events:none; font-size:12px; }
+  .combobox { position:relative; max-width:520px; }
+  .combobox-input { width:100%; padding:8px 12px; border:1px solid var(--line); border-radius:9px; font:inherit; font-size:13px; outline:0; background:#fff; }
+  .combobox-input:focus { border-color:#bcd8cd; box-shadow:0 0 0 3px #eaf5f0; }
+  .combobox-list { position:absolute; top:calc(100% + 6px); inset-inline:0; background:#fff; border:1px solid var(--line); border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,.12); max-height:200px; overflow:auto; display:none; z-index:9995; padding:4px; }
+  .combobox.open .combobox-list { display:block; }
+  .combobox-opt { padding:8px 10px; border-radius:8px; cursor:pointer; font-size:13px; display:flex; justify-content:space-between; align-items:center; }
+  .combobox-opt:hover, .combobox-opt[aria-selected=true] { background:#eef2f7; }
+  .combobox-opt mark { background:#fff3cd; padding:0 2px; border-radius:3px; }
+  .checkbox-group { display:flex; flex-direction:column; gap:8px; max-width:520px; }
+  .checkbox-row { display:flex; align-items:center; gap:8px; cursor:pointer; font-size:13px; }
+  .checkbox-row input[type=checkbox] { width:18px; height:18px; accent-color:var(--green); flex:0 0 auto; }
+  .checkbox-row input:indeterminate { accent-color:#b45309; }
+  .radio-group { display:flex; flex-direction:column; gap:8px; max-width:520px; }
+  .radio-card { display:flex; gap:10px; align-items:flex-start; border:1px solid var(--line); border-radius:10px; padding:10px 12px; cursor:pointer; background:#fff; transition:border-color .15s, background .15s; }
+  .radio-card:hover { border-color:#dbe2ea; }
+  .radio-card.selected { border-color:var(--green); background:#eaf5f0; }
+  .radio-card input[type=radio] { margin-top:3px; accent-color:var(--green); }
+  .radio-card .rc-title { font-weight:bold; font-size:13px; }
+  .radio-card .rc-desc { font-size:11.5px; color:var(--muted); }
+  .segmented { display:inline-flex; position:relative; background:#eef2f7; border-radius:999px; padding:3px; gap:0; direction:rtl; }
+  .segmented button { position:relative; z-index:1; border:0; background:transparent; padding:6px 16px; border-radius:999px; cursor:pointer; font-size:13px; transition:color .15s; }
+  .segmented button.active { color:var(--ink); }
+  .segmented-pill { position:absolute; top:3px; bottom:3px; background:#fff; border-radius:999px; box-shadow:0 1px 3px rgba(0,0,0,.12); transition:all .22s cubic-bezier(.16,1,.3,1); }
+
+  /* vibefarsi timeline/breadcrumb/pagination/tabs/stat — نمایش و ناوبری */
+  .timeline { position:relative; padding-inline-end:0; padding-right:18px; border-right:2px solid var(--line); margin:12px 0; }
+  .timeline-item { position:relative; margin-bottom:14px; padding-right:12px; }
+  .timeline-item::before { content:""; position:absolute; width:10px; height:10px; background:var(--green); border-radius:50%; right:-6px; top:6px; border:2px solid #fff; box-shadow:0 0 0 2px var(--green); }
+  .timeline-date { font-size:11.5px; color:var(--muted); }
+  .timeline-title { font-weight:bold; font-size:13px; margin:2px 0; }
+  .timeline-desc { font-size:12.5px; color:#374151; }
+  .breadcrumb { display:flex; gap:6px; align-items:center; font-size:13px; color:var(--muted); flex-wrap:wrap; }
+  .breadcrumb a { color:var(--green); text-decoration:none; }
+  .breadcrumb a:hover { text-decoration:underline; }
+  .breadcrumb .sep { color:var(--muted); transform:scaleX(-1); display:inline-block; }
+  .pagination { display:flex; gap:6px; align-items:center; direction:rtl; flex-wrap:wrap; }
+  .pagination button { min-width:32px; height:32px; border:1px solid var(--line); background:#fff; border-radius:8px; cursor:pointer; font-variant-numeric:tabular-nums; font-size:13px; }
+  .pagination button.active { background:var(--green); color:#fff; border-color:var(--green); font-weight:bold; }
+  .pagination button:disabled { opacity:.5; cursor:default; }
+  .pagination .dots { color:var(--muted); padding:0 4px; }
+  .tabs { display:flex; gap:18px; border-bottom:1px solid var(--line); direction:rtl; }
+  .tabs button { border:0; background:transparent; padding:10px 4px; cursor:pointer; font-size:13px; color:var(--muted); border-bottom:2px solid transparent; margin-bottom:-1px; }
+  .tabs button.active { color:var(--green); border-bottom-color:var(--green); font-weight:bold; }
+  .tabs-panel { padding:10px 0; font-size:13px; line-height:1.9; }
+  .stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px; }
+
+  /* vibefarsi data-table/carousel — جدول پیشرفته + اسلایدر RTL */
+  .data-table-wrap { border:1px solid var(--line); border-radius:10px; overflow:hidden; background:#fff; max-width:860px; }
+  .data-table-bar { display:flex; gap:8px; align-items:center; padding:8px 10px; border-bottom:1px solid var(--line); background:#f8fafc; flex-wrap:wrap; }
+  .data-table-bar input { flex:1; min-width:180px; padding:7px 10px; border:1px solid var(--line); border-radius:8px; font:inherit; font-size:13px; outline:0; }
+  .data-table-bar input:focus { border-color:#bcd8cd; box-shadow:0 0 0 3px #eaf5f0; }
+  .data-table { width:100%; border-collapse:collapse; font-size:12.5px; }
+  .data-table th { background:#eef2f7; cursor:pointer; user-select:none; position:relative; white-space:nowrap; }
+  .data-table th:hover { background:#e3e8ef; }
+  .data-table th.sort-asc::after { content:" ▲"; font-size:10px; }
+  .data-table th.sort-desc::after { content:" ▼"; font-size:10px; }
+  .data-table td.num { font-variant-numeric:tabular-nums; direction:ltr; text-align:right; unicode-bidi:plaintext; }
+  .carousel { position:relative; overflow:hidden; max-width:860px; border:1px solid var(--line); border-radius:10px; background:#fff; padding:10px; }
+  .carousel-track { display:flex; gap:10px; overflow-x:auto; scroll-snap-type:x mandatory; direction:rtl; scrollbar-width:thin; padding-bottom:4px; }
+  .carousel-track::-webkit-scrollbar { height:6px; }
+  .carousel-card { flex:0 0 160px; scroll-snap-align:start; border:1px solid var(--line); border-radius:10px; padding:10px; background:#f8fafc; text-align:center; }
+  .carousel-card .emoji { font-size:28px; }
+  .carousel-nav { display:flex; gap:6px; justify-content:flex-end; margin-top:8px; }
+  .carousel-nav button { min-width:32px; height:32px; border:1px solid var(--line); background:#fff; border-radius:8px; cursor:pointer; }
+
+  /* vibefarsi overlay — popover/hover-card/context-menu/sheet/separator/spinner */
+  .popover-wrap { position:relative; display:inline-block; }
+  .popover-panel { position:absolute; top:calc(100% + 8px); inset-inline-start:50%; transform:translateX(-50%); min-width:220px; background:#fff; border:1px solid var(--line); border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,.14); padding:12px; z-index:9995; display:none; }
+  .popover-wrap.open .popover-panel { display:block; }
+  .hover-card-wrap { position:relative; display:inline-block; }
+  .hover-card { position:absolute; bottom:calc(100% + 8px); inset-inline-start:50%; transform:translateX(-50%); width:240px; background:#fff; border:1px solid var(--line); border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,.16); padding:12px; z-index:9995; display:none; }
+  .hover-card-wrap:hover .hover-card, .hover-card-wrap:focus-within .hover-card { display:block; }
+  .context-area { border:1px dashed #dbe2ea; border-radius:10px; padding:24px; text-align:center; background:#f8fafc; cursor:context-menu; user-select:none; max-width:520px; }
+  .context-menu { position:fixed; min-width:180px; background:#fff; border:1px solid var(--line); border-radius:10px; box-shadow:0 8px 32px rgba(0,0,0,.16); padding:6px; z-index:10000; display:none; }
+  .context-menu.open { display:block; }
+  .context-item { display:flex; justify-content:space-between; padding:8px 10px; border-radius:8px; cursor:pointer; font-size:13px; }
+  .context-item:hover { background:#eef2f7; }
+  .sheet-overlay { position:fixed; inset:0; background:rgba(15,23,42,.45); backdrop-filter:blur(2px); z-index:9998; display:none; }
+  .sheet-overlay.open { display:block; }
+  .sheet { position:fixed; top:0; inset-inline-end:0; bottom:0; width:320px; background:#fff; border-left:1px solid var(--line); box-shadow:-8px 0 32px rgba(0,0,0,.14); z-index:9999; transform:translateX(100%); transition:transform .22s cubic-bezier(.16,1,.3,1); display:flex; flex-direction:column; }
+  [dir="rtl"] .sheet { inset-inline-end:0; inset-inline-start:auto; transform:translateX(-100%); }
+  [dir="rtl"] .sheet.open { transform:translateX(0); }
+  .sheet.open { transform:translateX(0); }
+  .sheet-head { padding:12px 16px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; font-weight:bold; }
+  .sheet-body { padding:12px 16px; overflow:auto; flex:1; }
+  .separator { height:1px; background:var(--line); margin:12px 0; position:relative; }
+  .separator span { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:#fff; padding:0 10px; color:var(--muted); font-size:12px; }
+  .spinner { display:inline-block; width:16px; height:16px; border:2px solid #e5e7eb; border-top-color:var(--green); border-radius:50%; animation:spin .6s linear infinite; vertical-align:middle; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+  .spinner-lg { width:24px; height:24px; border-width:3px; }
+
+  /* vibefarsi time-picker/otp/collapsible/scroll-area/countdown — ورودی‌های تخصصی */
+  .time-picker { display:flex; align-items:center; gap:6px; max-width:320px; border:1px solid var(--line); border-radius:9px; padding:6px 8px; background:#fff; direction:ltr; }
+  .time-picker input { width:40px; text-align:center; border:0; outline:0; font:inherit; font-size:13px; font-variant-numeric:tabular-nums; }
+  .time-picker span { color:var(--muted); }
+  .otp-group { display:flex; gap:6px; direction:ltr; justify-content:flex-end; }
+  .otp-group input { width:38px; height:42px; text-align:center; border:1px solid var(--line); border-radius:8px; font-size:18px; font-variant-numeric:tabular-nums; outline:0; }
+  .otp-group input:focus { border-color:#bcd8cd; box-shadow:0 0 0 3px #eaf5f0; }
+  .collapsible { border:1px solid var(--line); border-radius:10px; background:#fff; overflow:hidden; max-width:520px; }
+  .collapsible button { width:100%; text-align:right; border:0; background:#f8fafc; padding:10px 12px; cursor:pointer; font-size:13px; display:flex; justify-content:space-between; align-items:center; }
+  .collapsible-content { padding:10px 12px; font-size:13px; line-height:1.9; display:none; border-top:1px solid var(--line); }
+  .collapsible.open .collapsible-content { display:block; }
+  .scroll-area { max-height:120px; overflow:auto; border:1px solid var(--line); border-radius:10px; padding:8px; background:#fff; max-width:520px; scrollbar-width:thin; }
+  .scroll-area::-webkit-scrollbar { width:6px; }
+  .scroll-area::-webkit-scrollbar-thumb { background:#dbe2ea; border-radius:999px; }
+  .countdown { display:flex; gap:6px; direction:ltr; font-variant-numeric:tabular-nums; font-size:14px; align-items:center; }
+  .countdown span { background:#0b3d2e; color:#fff; padding:4px 8px; border-radius:8px; min-width:32px; text-align:center; }
+
+  /* vibefarsi avatar/aspect/resizable/theme — هویت و چیدمان */
+  .avatar { width:40px; height:40px; border-radius:50%; object-fit:cover; border:1px solid var(--line); background:#eef2f7; display:inline-flex; align-items:center; justify-content:center; font-size:13px; color:#0b3d2e; font-weight:700; position:relative; overflow:hidden; }
+  .avatar.sm { width:32px; height:32px; font-size:11px; }
+  .avatar.lg { width:56px; height:56px; font-size:16px; }
+  .avatar-group { display:flex; }
+  .avatar-group .avatar { margin-inline-start:-8px; border:1px solid #fff; }
+  .avatar-status { position:absolute; inset-inline-end:1px; inset-block-end:1px; width:10px; height:10px; border-radius:50%; border:2px solid #fff; }
+  .avatar-status.online { background:#0f766e; }
+  .avatar-status.offline { background:#9aa3b2; }
+  .aspect-box { position:relative; width:100%; background:#f8fafc; border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+  .aspect-box.aspect-16-9 { aspect-ratio:16/9; }
+  .aspect-box img { width:100%; height:100%; object-fit:cover; }
+  .resizable { display:flex; border:1px solid var(--line); border-radius:10px; overflow:hidden; height:160px; max-width:520px; background:#fff; }
+  .resizable-pane { flex:1 1 50%; overflow:auto; padding:8px; font-size:13px; }
+  .resizable-handle { width:8px; background:#eef2f7; border-inline:1px solid var(--line); cursor:col-resize; display:flex; align-items:center; justify-content:center; user-select:none; }
+  .resizable-handle::after { content:"⋮"; color:#9aa3b2; line-height:1; }
+  .theme-toggle { border:1px solid var(--line); background:#fff; border-radius:999px; padding:4px 10px; cursor:pointer; font-size:13px; }
+  [data-theme="dark"] { --bg:#0f172a; --card:#1e293b; --line:#334155; --muted:#94a3b8; }
+  [data-theme="dark"] body { background:var(--bg); color:#e2e8f0; }
+  .bg-mesh { background: radial-gradient(600px 300px at 80% 0%, #e6f4ef 20%, transparent 70%), radial-gradient(500px 400px at 0% 100%, #fff7ed 15%, transparent 70%), var(--bg); border-radius:12px; padding:12px; border:1px dashed var(--line); }
+
   @media (max-width: 900px) { nav { display:none; } }
 </style>
 </head>
@@ -83,6 +365,18 @@
   <div class="meta"><b>خرید و فروش اوراق مشتقه</b> — گام‌های واجب: داده ← سرمایهٔ شما ← اجرا ← <b>تصمیمِ خرید و فروش</b> · (پنج گامِ آخر، اثباتِ اختیاریِ برنامه برای سرمایه‌گذار)</div>
   <div class="badge" id="badge">منبع داده: تنظیم نشده</div>
   <div class="badge" id="whoami" style="background:#eef2ff;color:#3730a3">دسترسی: در حال بررسی…</div>
+  <span class="hint" style="margin-inline-start:10px">میانبرها: <kbd>Ctrl</kbd>+<kbd>K</kbd> جستجو · <kbd>Esc</kbd> بستن</span>
+  <span class="badge-soft ok" style="margin-inline-start:8px">آفلاین</span>
+  <span class="badge-soft">راست‌چین</span>
+  <div class="dropdown" id="header-actions" style="margin-inline-start:8px; display:inline-block;">
+    <button class="dropdown-trigger" id="header-actions-trigger" aria-haspopup="menu" aria-expanded="false" onclick="toggleDropdown('header-actions')">اقدامات ▾</button>
+    <div class="dropdown-menu" id="header-actions-menu" role="menu" aria-label="اقدامات">
+      <button class="dropdown-item" role="menuitem" onclick="showStep(5); closeDropdown('header-actions')">برو به تصمیم امروز <span class="cmd-kbd">→</span></button>
+      <button class="dropdown-item" role="menuitem" onclick="openCommand(); closeDropdown('header-actions')">پالت دستور <span class="cmd-kbd">Ctrl+K</span></button>
+      <div class="dropdown-sep" role="separator"></div>
+      <button class="dropdown-item danger" role="menuitem" onclick="closeDropdown('header-actions'); if(window.Dialog) Dialog.alert('برنامه بدون ذخیرهٔ ابری است — از پنل پشتیبان بگیرید.',{variant:'warning'})">خاموشیِ محتاط<span class="cmd-kbd">!</span></button>
+    </div>
+  </div>
   <button onclick="logoutApp()" style="margin-top:4px" id="logout-btn">خروج</button>
 </header>
 
@@ -102,6 +396,7 @@
         یعنی تصمیم روی عدد است، نه روی حدس.<br>
         کارِ امروز، چهار گام: <b>۱ دادهٔ امروز ← ۲ سرمایه‌ات ← ۳ اجرا ← ۴ تصمیمِ خرید و فروش</b></p>
         <button class="primary" style="margin-top:10px;font-size:14px" onclick="showStep(5)">برو به تصمیمِ امروزِ خرید و فروش →</button>
+        <div class="alert alert-info" style="margin-top:12px">این ایستگاه سفارش نمی‌زند — تصمیم با شماست، عدد با برنامه. <span class="tooltip" data-tip="همیشه تصمیمِ انسانی" tabindex="0">ℹ️</span></div>
       </div>
       <p class="lead">این ایستگاه «کجا تفاوت قیمت‌ها از حاشیهٔ اطمینان عبور می‌کند» را پیدا می‌کند،
 هشدارهای کدال را کنار همان سیگنال می‌گذارد و اندازهٔ هر موقعیت را از بودجهٔ وجه تضمین درمی‌آورد.
@@ -245,7 +540,7 @@
         <p class="hint">یک پروفایل انتخاب کنید، کادرهای بالا خودشان پر می‌شوند، آزمایش کنید و ذخیره کنید.
         از آن به بعد، هر بار که برنامه بالا بیاید همین اتصال خودکار فعال می‌شود.</p>
         <div class="row">
-          <select id="conn-select" style="flex:1;min-width:280px" onchange="loadProfile()"></select>
+          <select id="conn-select" aria-label="پروفایلِ اتصالِ انتخاب‌شده" style="flex:1;min-width:280px" onchange="loadProfile()"></select>
           <button class="primary" onclick="testProfile()">آزمایش اتصال این پروفایل</button>
           <button onclick="saveProfile()">ذخیره و فعال کردن</button>
           <button class="danger" onclick="deleteProfile()">پاک کردن پروفایل</button>
@@ -398,7 +693,7 @@
       <div class="card">
         <label><input type="checkbox" id="use-kodal" checked> از هشدارهای دیده‌بان کدال استفاده کن</label>
         <div class="row" style="margin-top:6px">
-          <input type="text" id="kodal-db" style="flex:1;min-width:300px">
+          <input type="text" id="kodal-db" aria-label="نشانی پروندهٔ دیده‌بان کدال" style="flex:1;min-width:300px">
           <button onclick="runKodalDemo()">اجرای دیده‌بان روی دادهٔ نمونه</button>
           <button onclick="showAlerts()">نمایش هشدارهای فعلی</button>
         </div>
@@ -432,7 +727,7 @@
           <button class="danger" onclick="decide('rejected')">رد با دلیل</button>
         </div>
       </div>
-      <table id="signals-table">
+      <div class="search-wrap" style="margin:8px 0; max-width:360px"><span class="search-icon">🔍</span><input type="text" id="signals-search" class="search-input" placeholder="جستجو در سیگنال‌ها…" oninput="debouncedSearchSignals(this.value)"><button type="button" class="search-clear" aria-label="پاک کردن" onclick="this.previousElementSibling.value=&quot;&quot;;this.previousElementSibling.dispatchEvent(new Event(&quot;input&quot;))">×</button></div><table id="signals-table">
         <thead><tr><th>شناسه</th><th>نماد</th><th>راهبرد</th><th class="num">بازده سالانه٪</th><th class="num">حاشیه</th>
         <th>اندازه</th><th class="num">سرمایه (ریال)</th><th>وضعیت</th><th>دلیل دروازه / خبر</th></tr></thead>
         <tbody></tbody>
@@ -446,7 +741,7 @@
         سیگنال با <b>کارمزد واقعی، اسپرد، نقدشوندگی و نرخ سد</b> می‌مانَد یا می‌افتد. عددهای سیگنال آن‌ها را
         این‌جا بگذارید تا داوری، «نقطهٔ برگشت» و «فاصله تا مارجین‌کال» را بگیرید.</p>
         <div class="row">
-          <select id="judge-kind" style="min-width:190px">
+          <select id="judge-kind" aria-label="نوعِ راهبردِ سیگنال" style="min-width:190px">
             <option value="basis">خرید نقدی و فروش آتی (کری)</option>
             <option value="covered">پوشش‌داده‌شده (کاورد کال)</option>
             <option value="tabei">تبعی (تضمین فروش)</option>
@@ -482,12 +777,12 @@
 
     <!-- ۷ -->
     <section id="s-backtest">
-      <h3>۷. پس‌آزمایی روی دادهٔ تاریخ <span style="font-size:11px;color:#6b7280;background:#f0f2f5;border:1px solid #e3e6ea;border-radius:10px;padding:1px 8px;font-weight:normal">برای اثباتِ برنامه — اختیاری</span></h3>
+      <h3>۷. پس‌آزمایی روی دادهٔ تاریخ <span style="font-size:11px;color:#5b6472;background:#f0f2f5;border:1px solid #e3e6ea;border-radius:10px;padding:1px 8px;font-weight:normal">برای اثباتِ برنامه — اختیاری</span></h3>
       <p class="lead">همان موتوری که در تصمیم زنده کار می‌کند، روی دادهٔ گذشته اجرا می‌شود:
 نرخ برد، خطای مثبت کاذب، فرصت‌های از دست رفته، و خطای پیش‌بینی (انتظار منهای واقعیت) حساب می‌شود.</p>
       <div class="card">
         <div class="row">
-          <input type="text" id="hist-path" style="flex:1;min-width:300px">
+          <input type="text" id="hist-path" aria-label="نشانی پروندهٔ تاریخ" style="flex:1;min-width:300px">
           <button onclick="makeHistTemplate()">ساخت قالب ستون‌ها</button>
           <button class="primary" onclick="doBacktest()">اجرای پس‌آزمایی</button>
           <button onclick="openFile('backtest')">نمایش گزارش</button>
@@ -502,7 +797,7 @@
 
     <!-- ۸ -->
     <section id="s-bundle">
-      <h3>۸. بستهٔ تحویل شرکت <span style="font-size:11px;color:#6b7280;background:#f0f2f5;border:1px solid #e3e6ea;border-radius:10px;padding:1px 8px;font-weight:normal">برای اثباتِ برنامه — اختیاری</span></h3>
+      <h3>۸. بستهٔ تحویل شرکت <span style="font-size:11px;color:#5b6472;background:#f0f2f5;border:1px solid #e3e6ea;border-radius:10px;padding:1px 8px;font-weight:normal">برای اثباتِ برنامه — اختیاری</span></h3>
       <p class="lead">این بسته همه‌چیز را برای راستی‌آزمایی شرکت در یک پوشه می‌گذارد:
 گزارش تصمیم‌ها، فهرست سیگنال‌ها، سند روش کار، بسته‌های سفارش، نتیجهٔ پس‌آزمایی،
 و چک‌لیستی که خودشان در پنج دقیقه راستی‌آزمایی کنند.</p>
@@ -534,14 +829,14 @@
         چند پیام، چند تماس، چند جلسه. شمارهٔ تلفن در این دفتر ذخیره نمی‌شود.</p>
         <div class="row">
           <input type="text" id="prospect-name" placeholder="نام مخاطب" style="min-width:180px">
-          <select id="prospect-kind" style="min-width:190px">
+          <select id="prospect-kind" aria-label="دستهٔ مخاطب" style="min-width:190px">
             <option value="company">شرکت غیرمالی</option>
             <option value="brokerage">کارگزاری / تأمین سرمایه</option>
             <option value="teacher">مدرس یا تحلیلگر</option>
             <option value="known">آشنای بازار</option>
             <option value="university">دانشگاه / انجمن علمی</option>
           </select>
-          <select id="prospect-channel" style="min-width:140px">
+          <select id="prospect-channel" aria-label="کانالِ پیگیری" style="min-width:140px">
             <option value="telegram">تلگرام</option>
             <option value="whatsapp">واتساپ</option>
             <option value="phone">تلفن</option>
@@ -557,7 +852,7 @@
         </div>
         <div class="row" style="margin-top:6px">
           <input type="text" id="prospect-date" placeholder="تاریخ YYYY-MM-DD (خالی = امروز)" style="min-width:200px">
-          <select id="prospect-result" style="min-width:130px">
+          <select id="prospect-result" aria-label="نتیجهٔ پیگیری" style="min-width:130px">
             <option value="بله">نتیجه: بله</option>
             <option value="نه">نتیجه: نه</option>
             <option value="بعداً">نتیجه: بعداً</option>
@@ -593,7 +888,7 @@
 
     <!-- ۹ -->
     <section id="s-trial">
-      <h3>۹. آزمون زنده و دفتر سرمایه‌گذار <span style="font-size:11px;color:#6b7280;background:#f0f2f5;border:1px solid #e3e6ea;border-radius:10px;padding:1px 8px;font-weight:normal">برای اثباتِ برنامه — اختیاری</span></h3>
+      <h3>۹. آزمون زنده و دفتر سرمایه‌گذار <span style="font-size:11px;color:#5b6472;background:#f0f2f5;border:1px solid #e3e6ea;border-radius:10px;padding:1px 8px;font-weight:normal">برای اثباتِ برنامه — اختیاری</span></h3>
       <p class="lead">اینجا همان چیزی است که ارزش برنامه را ثابت می‌کند: نه وعدهٔ سود، بلکه <b>سابقهٔ ثبت‌شده</b>.
 هر سیگنالی که برنامه می‌سازد، با ساعت دقیق و همهٔ ورودی‌های ریاضی در دفتر می‌نشیند.
 بعداً با خواندن قیمت‌های تازه، دفتر می‌گوید همان فرصت امروز بازتر شد، بسته شد، یا زیر کف رفت.
@@ -721,7 +1016,7 @@
     </section>
 
     <section id="s-blind">
-      <h3>۱۰. آزمون کور سرمایه‌گذار — «خودش بپرسد، خودش حساب کند، خودش باور کند» <span style="font-size:11px;color:#6b7280;background:#f0f2f5;border:1px solid #e3e6ea;border-radius:10px;padding:1px 8px;font-weight:normal">برای اثباتِ برنامه — اختیاری</span></h3>
+      <h3>۱۰. آزمون کور سرمایه‌گذار — «خودش بپرسد، خودش حساب کند، خودش باور کند» <span style="font-size:11px;color:#5b6472;background:#f0f2f5;border:1px solid #e3e6ea;border-radius:10px;padding:1px 8px;font-weight:normal">برای اثباتِ برنامه — اختیاری</span></h3>
       <p class="lead">بهترین راه متقاعدکردن سرمایه‌گذار باسواد این نیست که سود نشانش بدهیم؛ این است که
       خودش یک عدد را روی کاغذ حساب کند و ببیند برنامه همان را می‌گوید. این گام سه کار می‌کند:
       شش پرسش کور می‌پرسد و پاسخ‌ها را پنهان نگه می‌دارد، آستانهٔ ریزش راهبردها را نشان می‌دهد،
@@ -777,7 +1072,7 @@
           <button onclick="openFile('zero-cost')">سند «چرا هیچ‌چیز نمی‌خریم»</button>
         </div>
         <div class="row" style="margin-top:6px">
-          <button class="primary" onclick="makePledge()">ساخت پیمان‌نامهٔ نمایش (دواِمضا)</button>
+          <button class="primary" onclick="makePledge()">ساخت پیمان‌نامهٔ نمایش (دو امضا)</button>
           <button onclick="openFile('pledge')">نمایش پیمان‌نامه</button>
           <button onclick="loadLadder()">ساخت سند «چه بخرم / کِی بفروشم / کِی می‌افتد»</button>
           <button onclick="openFile('ladder')">نمایش سند پلهٔ تصمیم</button>
@@ -787,7 +1082,7 @@
     </section>
 
     <section id="s-math">
-      <h3>۱۱. راهبردها، شوک‌آزمون و ریاضیِ پول — «ایده‌های پول‌ساز، با عدد و با مرزِ افتادن» <span style="font-size:11px;color:#6b7280;background:#f0f2f5;border:1px solid #e3e6ea;border-radius:10px;padding:1px 8px;font-weight:normal">برای اثباتِ برنامه — اختیاری</span></h3>
+      <h3>۱۱. راهبردها، شوک‌آزمون و ریاضیِ پول — «ایده‌های پول‌ساز، با عدد و با مرزِ افتادن» <span style="font-size:11px;color:#5b6472;background:#f0f2f5;border:1px solid #e3e6ea;border-radius:10px;padding:1px 8px;font-weight:normal">برای اثباتِ برنامه — اختیاری</span></h3>
       <p class="lead">این گام سه سند می‌سازد. هیچ‌کدام وعدهٔ سود نیست: یکی می‌گوید هر راهبرد چه وقت
       به‌کار می‌آید و <b>کِی باید ببندی</b>، یکی راهبردها را زیر شرایط بد می‌گذارد تا ببینی کجا می‌افتند،
       و یکی ریاضیِ بقا را می‌گوید (اندازهٔ درست هر معامله، احتمال نیم‌شدن حساب، و چند وقت تا هدف).</p>
@@ -823,9 +1118,9 @@
         کسر کِلی (و نسخهٔ نصف‌کِلی محافظه‌کارانه) را حساب می‌کند، هزاران مسیر ممکن را شبیه‌سازی می‌کند
         و می‌گوید با این مزیت و این کارمزد، رسیدن به هدف چند ماه/سال طول می‌کشد — و کجا احتمال نیم‌شدن حساب هست.</p>
         <div class="row">
-          <input type="text" id="bk-capital" placeholder="سرمایه (ریال)" value="100000000" style="min-width:150px">
-          <input type="text" id="bk-target" placeholder="هدف (ریال)" value="400000000" style="min-width:150px">
-          <input type="text" id="bk-winprob" placeholder="نرخ برد (۰٫۵۵)" value="0.55" style="min-width:120px">
+          <label class="amount-wrap" style="min-width:150px;"><input type="text" id="bk-capital" class="amount-input" placeholder="سرمایه (ریال)" value="۱۰۰٬۰۰۰٬۰۰۰" data-unit="ریال" style="min-width:150px"><span class="amount-unit">ریال</span><div class="amount-words" id="bk-capital-words">صد میلیون ریال</div><div class="amount-quick"><button type="button" onclick="setAmount('bk-capital',100000000)">۱۰۰ میلیون</button><button type="button" onclick="setAmount('bk-capital',400000000)">۴۰۰ میلیون</button><button type="button" onclick="setAmount('bk-capital',1000000000)">۱ میلیارد</button></div></label>
+          <label class="amount-wrap" style="min-width:150px;"><input type="text" id="bk-target" class="amount-input" placeholder="هدف (ریال)" value="۴۰۰٬۰۰۰٬۰۰۰" data-unit="ریال" style="min-width:150px"><span class="amount-unit">ریال</span><div class="amount-words" id="bk-target-words">چهارصد میلیون ریال</div><div class="amount-quick"><button type="button" onclick="setAmount('bk-target',400000000)">۴۰۰ میلیون</button><button type="button" onclick="setAmount('bk-target',1000000000)">۱ میلیارد</button></div></label>
+          <label class="number-field" aria-label="نرخ برد"><button type="button" onclick="stepNumber('bk-winprob',-0.05)" aria-label="کاهش">−</button><input type="text" id="bk-winprob" value="۰٫۵۵" inputmode="decimal" style="min-width:72px"><button type="button" onclick="stepNumber('bk-winprob',0.05)" aria-label="افزایش">+</button></label>
           <input type="text" id="bk-win" placeholder="سود برد (٪)" value="8" style="min-width:110px">
           <input type="text" id="bk-loss" placeholder="زیان باخت (٪)" value="5" style="min-width:110px">
           <input type="text" id="bk-strategy" placeholder="بازده راهبرد (٪ سالانه)" value="68.482" style="min-width:170px">
@@ -836,6 +1131,367 @@
           <span class="busy" id="busy-bankroll">در حال حساب…</span>
         </div>
         <div id="bankroll-box" class="hint">هنوز حساب نشده است.</div>
+      <div class="card" style="border-style:dashed">
+        <h4>نمونهٔ ورودی مبلغ — <span class="price">۱٬۲۵۰٬۰۰۰<span class="price-unit">تومان</span></span></h4>
+        <p class="hint">همان spec وایب‌فارسی: «ورودی مبلغ با جداکنندهٔ هزارگان هنگام تایپ، واحد بعد از عدد و مبلغ به حروف زیرِ فیلد»</p>
+        <label class="amount-wrap" style="max-width:320px;"><input type="text" id="demo-amount" class="amount-input" value="۱٬۲۵۰٬۰۰۰" data-unit="تومان" placeholder="مبلغ"><span class="amount-unit">تومان</span><div class="amount-words" id="demo-amount-words">یک میلیون و دویست و پنجاه هزار تومان</div><div class="amount-quick"><button type="button" onclick="setAmount('demo-amount',100000)">۱۰۰ هزار</button><button type="button" onclick="setAmount('demo-amount',500000)">۵۰۰ هزار</button><button type="button" onclick="setAmount('demo-amount',1000000)">۱ میلیون</button><button type="button" onclick="setAmount('demo-amount',5000000)">۵ میلیون</button></div></label>
+        <div class="row" style="margin-top:8px"><span class="hint">عددِ نمونه: </span><span class="price">۱۲٬۴۵۰٬۰۰۰<span class="price-unit">تومان</span></span> <span class="badge-soft">۱۶٪ تخفیف</span></div>
+      </div>
+      <div class="card" style="border-style:dashed">
+        <h4>نمونهٔ جستجو + برچسب‌ها + چندانتخابی — vibefarsi</h4>
+        <p class="hint">search-input (ذره‌بین، پاک‌کن، debounce) · tags-input (Enter/، → چیپ) · multi-select (چیپِ داخلِ فیلد + «+۲ مورد دیگر»)</p>
+        <label style="font-size:12.5px;color:var(--muted)">جستجو (⌘K)</label>
+        <div class="search-wrap" style="margin-top:4px">
+          <span class="search-icon" aria-hidden="true">🔍</span>
+          <input type="text" id="demo-search" class="search-input" placeholder="جستجوی نماد، مثل فولاد…" autocomplete="off">
+          <button type="button" class="search-clear" id="demo-search-clear" aria-label="پاک کردن" onclick="document.getElementById('demo-search').value='';document.getElementById('demo-search').dispatchEvent(new Event('input'));document.getElementById('demo-search').focus()">×</button>
+          <span class="search-kbd"><kbd>⌘K</kbd></span>
+        </div>
+        <div class="hint" id="demo-search-hint" style="margin-top:4px; min-height:16px"></div>
+
+        <label style="font-size:12.5px;color:var(--muted);margin-top:10px;display:block">برچسب‌ها — Enter یا ویرگول فارسی (،) هر عبارت را چیپ می‌کند</label>
+        <div class="tags-input" id="demo-tags" role="group" aria-label="برچسب‌ها" onclick="document.getElementById('demo-tags-input').focus()">
+          <span class="tag-chip">ری‌اکت <button type="button" aria-label="حذف" onclick="removeTag('demo-tags','ری‌اکت')">×</button></span>
+          <span class="tag-chip">تیلویند <button type="button" aria-label="حذف" onclick="removeTag('demo-tags','تیلویند')">×</button></span>
+          <input type="text" id="demo-tags-input" placeholder="برچسب تازه…" aria-label="افزودن برچسب" onkeydown="handleTagsKey(event,'demo-tags')" onpaste="handleTagsPaste(event,'demo-tags')">
+        </div>
+        <div class="tags-hint">۲ / ۵ — متنِ چسبانده‌شده با ویرگول می‌شکند و تکراری نمی‌پذیرد</div>
+
+        <label style="font-size:12.5px;color:var(--muted);margin-top:10px;display:block">چندانتخابی — با جستجو و چیپ</label>
+        <div class="multi-select" id="demo-multi" role="combobox" aria-expanded="false" aria-haspopup="listbox">
+          <div class="multi-select-trigger" onclick="toggleMulti('demo-multi')" tabindex="0" role="button" aria-label="انتخاب چندتایی">
+            <span class="tag-chip" data-value="react">ری‌اکت <button type="button" onclick="event.stopPropagation(); toggleMultiValue('demo-multi','react')">×</button></span>
+            <span class="tag-chip" data-value="ts">تایپ‌اسکریپت <button type="button" onclick="event.stopPropagation(); toggleMultiValue('demo-multi','ts')">×</button></span>
+            <input type="text" id="demo-multi-input" placeholder="جستجو…" aria-label="جستجو در چندانتخابی" oninput="filterMulti('demo-multi')" onkeydown="if(event.key==='Escape') closeMulti('demo-multi')" onclick="event.stopPropagation(); openMulti('demo-multi')">
+          </div>
+          <div class="multi-select-dropdown" role="listbox" aria-label="گزینه‌ها">
+            <label class="multi-opt" role="option"><input type="checkbox" value="react" checked onchange="toggleMultiValue('demo-multi','react')"> ری‌اکت</label>
+            <label class="multi-opt" role="option"><input type="checkbox" value="ts" checked onchange="toggleMultiValue('demo-multi','ts')"> تایپ‌اسکریپت</label>
+            <label class="multi-opt" role="option"><input type="checkbox" value="next" onchange="toggleMultiValue('demo-multi','next')"> نکست‌جی‌اس</label>
+            <label class="multi-opt" role="option"><input type="checkbox" value="vue" onchange="toggleMultiValue('demo-multi','vue')"> ویو</label>
+          </div>
+        </div>
+        <div class="multi-more" id="demo-multi-more">+۰ مورد دیگر</div>
+      </div>
+      <div class="card" style="border-style:dashed">
+        <h4>نمونهٔ احراز ایرانی — vibefarsi iran-validation</h4>
+        <p class="hint">phone-input (+98 ثابت، گروه ۳-۳-۴، تشخیص اپراتور) · iban-input (IR + گروه ۴تایی، mod-97، تشخیص بانک) · national-id-input (۱۰ رقم، گروه ۳-۶-۱، رقم کنترل) · card-number-input (۴×۴، Luhn + بانک) · plate-input (پلاک خودرو)</p>
+        <div class="grid2">
+          <div>
+            <label style="font-size:12.5px;color:var(--muted)">موبایل — بدون صفر اول هم می‌شود</label>
+            <label class="iran-field" style="margin-top:4px"><span class="iran-prefix">+98</span><input type="text" id="demo-phone" class="phone-input" placeholder="۹۱۲ ۳۴۵ ۶۷۸۹" inputmode="numeric" autocomplete="tel" oninput="validatePhone('demo-phone')" style="padding-inline-start:44px !important"></label>
+            <div class="iran-hint" id="demo-phone-hint">مثلاً ۰۹۱۲۳۴۵۶۷۸۹ یا ۹۱۲۳۴۵۶۷۸۹</div>
+          </div>
+          <div>
+            <label style="font-size:12.5px;color:var(--muted)">شبا — IR ثابت، ۲۴ رقم بعد</label>
+            <label class="iran-field" style="margin-top:4px"><span class="iran-prefix">IR</span><input type="text" id="demo-iban" class="iban-input" placeholder="۱۲۳۴ ۵۶۷۸ ۹۰۱۲ ۳۴۵۶ ۷۸۹۰ ۱۲۳۴" inputmode="numeric" oninput="validateIban('demo-iban')" style="padding-inline-start:30px !important; letter-spacing:0.5px"></label>
+            <div class="iran-hint" id="demo-iban-hint">گروه‌بندی ۴تایی، اعتبارسنجی mod-97</div>
+          </div>
+          <div>
+            <label style="font-size:12.5px;color:var(--muted)">کد ملی — همانِ روی کارت</label>
+            <label class="iran-field" style="margin-top:4px"><input type="text" id="demo-nid" class="nid-input" placeholder="۱۲۳-۴۵۶۷۸۹-۰" inputmode="numeric" oninput="validateNid('demo-nid')"></label>
+            <div class="iran-hint" id="demo-nid-hint">۱۰ رقم، گروه ۳-۶-۱، صفر اول می‌ماند</div>
+          </div>
+          <div>
+            <label style="font-size:12.5px;color:var(--muted)">شماره کارت — ۱۶ رقم</label>
+            <label class="iran-field" style="margin-top:4px"><input type="text" id="demo-card" class="card-input" placeholder="۶۲۱۹ ۸۶۱۰ ۱۲۳۴ ۵۶۷۸" inputmode="numeric" oninput="validateCard('demo-card')"></label>
+            <div class="iran-hint" id="demo-card-hint">۴ گروه ۴تایی، Luhn بعد از ۱۶ رقم + تشخیص بانک</div>
+          </div>
+        </div>
+        <div style="margin-top:10px">
+          <label style="font-size:12.5px;color:var(--muted)">پلاک خودرو — دو رقم، حرف، سه رقم + کد شهر</label>
+          <div class="plate-wrap" id="demo-plate" style="margin-top:4px">
+            <input type="text" id="plate-2" maxlength="2" placeholder="۱۲" inputmode="numeric" aria-label="دو رقم اول" oninput="validatePlate()">
+            <span class="plate-sep">—</span>
+            <select id="plate-letter" aria-label="حرف پلاک" onchange="validatePlate()"><option value="">حرف</option><option value="ب">ب</option><option value="ج">ج</option><option value="د">د</option><option value="س">س</option><option value="ص">ص</option><option value="ط">ط</option><option value="ق">ق</option><option value="ل">ل</option><option value="م">م</option><option value="ن">ن</option><option value="و">و</option><option value="ه">ه</option><option value="ی">ی</option></select>
+            <input type="text" id="plate-3" maxlength="3" placeholder="۳۴۵" inputmode="numeric" aria-label="سه رقم" oninput="validatePlate()">
+            <span class="plate-sep">|</span>
+            <input type="text" id="plate-city" maxlength="2" placeholder="۱۱" inputmode="numeric" aria-label="کد شهر" oninput="validatePlate()" style="width:44px">
+            <span class="badge-soft" style="margin-inline-start:6px">I.R.IRAN</span>
+            <span class="badge-soft" id="plate-province">ایران</span>
+          </div>
+          <div class="iran-hint" id="demo-plate-hint">حرف را از فهرست برگزینید؛ تایپ پیوسته بین جعبه‌ها جابه‌جا می‌شود</div>
+        </div>
+      </div>
+      <div class="card" style="border-style:dashed">
+        <h4>کنترل‌های فرم — vibefarsi</h4>
+        <p class="hint">switch (RTL دستگیره به سمتِ درست) · slider (مسیر از راست) · rating (ستاره از راست + هاور) · file-upload (کشیدن و رها کردن) · password-input (نمایش/پنهان + سنجش قدرت فارسی)</p>
+        <div class="grid2">
+          <div>
+            <label class="switch" role="switch" aria-checked="false" id="demo-switch-wrap"><input type="checkbox" id="demo-switch" onchange="toggleSwitch('demo-switch')"><span>اعلان ایمیلی</span></label>
+            <div class="iran-hint" id="demo-switch-hint" style="margin-top:6px">خاموش</div>
+            <label class="switch" role="switch" aria-checked="true" style="margin-top:8px"><input type="checkbox" id="demo-switch2" checked onchange="toggleSwitch('demo-switch2')"><span>احراز دومرحله‌ای</span></label>
+            <div class="iran-hint" id="demo-switch2-hint">روشن</div>
+          </div>
+          <div>
+            <label style="font-size:12.5px;color:var(--muted)">حداکثر قیمت — مسیر از راست</label>
+            <div class="slider" id="demo-slider" role="slider" aria-valuemin="0" aria-valuemax="10000000" aria-valuenow="6500000" aria-label="حداکثر قیمت" tabindex="0" onclick="slideTo(event,'demo-slider')" onkeydown="slideKey(event,'demo-slider')"><div class="slider-fill" id="demo-slider-fill" style="width:65%"></div><div class="slider-thumb" id="demo-slider-thumb" style="inset-inline-end:65%"></div></div>
+            <div class="iran-hint" id="demo-slider-hint"><span class="price">۶٬۵۰۰٬۰۰۰<span class="price-unit">تومان</span></span></div>
+            <input type="range" id="demo-slider-input" min="0" max="10000000" step="100000" value="6500000" style="display:none" oninput="setSlider('demo-slider', this.value)">
+          </div>
+        </div>
+        <div style="margin-top:12px">
+          <label style="font-size:12.5px;color:var(--muted)">امتیاز — از راست پر می‌شود</label>
+          <div class="rating" id="demo-rating" role="radiogroup" aria-label="امتیاز" data-value="4">
+            <button type="button" role="radio" aria-checked="false" aria-label="۱ ستاره" onclick="setRating('demo-rating',1)" onmouseenter="previewRating('demo-rating',1)" onmouseleave="previewRating('demo-rating',0)">★</button>
+            <button type="button" role="radio" aria-checked="false" aria-label="۲ ستاره" onclick="setRating('demo-rating',2)" onmouseenter="previewRating('demo-rating',2)" onmouseleave="previewRating('demo-rating',0)">★</button>
+            <button type="button" role="radio" aria-checked="false" aria-label="۳ ستاره" onclick="setRating('demo-rating',3)" onmouseenter="previewRating('demo-rating',3)" onmouseleave="previewRating('demo-rating',0)">★</button>
+            <button type="button" role="radio" aria-checked="true" aria-label="۴ ستاره" class="filled" onclick="setRating('demo-rating',4)" onmouseenter="previewRating('demo-rating',4)" onmouseleave="previewRating('demo-rating',0)">★</button>
+            <button type="button" role="radio" aria-checked="false" aria-label="۵ ستاره" onclick="setRating('demo-rating',5)" onmouseenter="previewRating('demo-rating',5)" onmouseleave="previewRating('demo-rating',0)">★</button>
+            <span class="iran-hint" id="demo-rating-hint" style="margin-inline-start:8px">۴ از ۵</span>
+          </div>
+        </div>
+        <div style="margin-top:12px">
+          <label style="font-size:12.5px;color:var(--muted)">آپلود فایل — کشیدن و رها کردن</label>
+          <div class="file-drop" id="demo-drop" tabindex="0" role="button" aria-label="آپلود فایل" onclick="document.getElementById('demo-file').click()" ondragover="onDragOver(event,'demo-drop')" ondragleave="onDragLeave(event,'demo-drop')" ondrop="onDrop(event,'demo-drop')" onkeydown="if(event.key==='Enter') document.getElementById('demo-file').click()">فایل را این‌جا رها کنید یا <b>انتخاب کنید</b><div class="hint">PDF یا PNG، تا ۵ مگابایت</div></div>
+          <input type="file" id="demo-file" style="display:none" accept=".pdf,.png,.jpg" onchange="handleFiles(this.files,'demo-drop')">
+          <div class="file-list" id="demo-file-list"></div>
+        </div>
+        <div style="margin-top:12px">
+          <label style="font-size:12.5px;color:var(--muted)">رمز عبور — همیشه LTR + سنجش قدرت فارسی</label>
+          <label class="password-wrap" style="margin-top:4px"><input type="password" id="demo-pass" class="password-input" placeholder="••••••••" autocomplete="new-password" oninput="checkPassword('demo-pass')"><button type="button" class="password-toggle" aria-label="نمایش رمز" onclick="togglePassword('demo-pass')" id="demo-pass-toggle">👁</button></label>
+          <div class="strength" aria-hidden="true"><div class="strength-fill" id="demo-pass-fill"></div></div>
+          <div class="strength-label" id="demo-pass-hint">حداقل ۸ کاراکتر، با حرف بزرگ، عدد و نماد</div>
+        </div>
+      </div>
+      <div class="card" style="border-style:dashed">
+        <h4>انتخاب‌ها — vibefarsi</h4>
+        <p class="hint">select (شورون چپ، سفارشی) · combobox (پیشنهاد زنده، اول «شروع با») · checkbox-group (حالت نامشخص) · radio-group (کارتی با توضیح) · segmented-control (قرصِ لغزان)</p>
+        <div class="grid2">
+          <div>
+            <label style="font-size:12.5px;color:var(--muted)">انتخاب شهر — select بومیِ سفارشی</label>
+            <label class="select-wrap" style="margin-top:4px"><select id="demo-select" aria-label="انتخاب شهر" onchange="document.getElementById('demo-select-hint').textContent='انتخاب: '+this.value"><option value="">انتخاب کنید…</option><option value="تهران">تهران</option><option value="مشهد">مشهد</option><option value="شیراز">شیراز</option><option value="تبریز">تبریز</option></select></label>
+            <div class="iran-hint" id="demo-select-hint">—</div>
+          </div>
+          <div>
+            <label style="font-size:12.5px;color:var(--muted)">کمبوباکس — تایپ کنید (اول «شروع با»)</label>
+            <div class="combobox" id="demo-combo" role="combobox" aria-expanded="false" aria-haspopup="listbox">
+              <input type="text" id="demo-combo-input" class="combobox-input" placeholder="مثلاً ری‌اکت…" autocomplete="off" aria-label="جستجو" oninput="filterCombo('demo-combo')" onfocus="openCombo('demo-combo')" onkeydown="comboKey(event,'demo-combo')">
+              <div class="combobox-list" role="listbox" id="demo-combo-list">
+                <div class="combobox-opt" role="option" data-value="react" onclick="pickCombo('demo-combo','react')">ری‌اکت</div>
+                <div class="combobox-opt" role="option" data-value="next" onclick="pickCombo('demo-combo','next')">نکست‌جی‌اس</div>
+                <div class="combobox-opt" role="option" data-value="vue" onclick="pickCombo('demo-combo','vue')">ویو</div>
+                <div class="combobox-opt" role="option" data-value="angular" onclick="pickCombo('demo-combo','angular')">انگولار</div>
+                <div class="combobox-opt" role="option" data-value="svelte" onclick="pickCombo('demo-combo','svelte')">اسولت</div>
+              </div>
+            </div>
+            <div class="iran-hint" id="demo-combo-hint">۵ گزینه — اولِ «شروع با» می‌آید</div>
+          </div>
+        </div>
+        <div style="margin-top:12px">
+          <label style="font-size:12.5px;color:var(--muted)">گروه چک‌باکس — با «انتخاب همه» (حالت نامشخص)</label>
+          <div class="checkbox-group" id="demo-checks" role="group" aria-label="گزینه‌ها">
+            <label class="checkbox-row"><input type="checkbox" id="check-all" onchange="toggleCheckAll('demo-checks', this.checked)"> <b>انتخاب همه</b></label>
+            <label class="checkbox-row"><input type="checkbox" value="free" onchange="updateCheckAll('demo-checks')"> ارسال رایگان</label>
+            <label class="checkbox-row"><input type="checkbox" value="gift" onchange="updateCheckAll('demo-checks')"> بسته‌بندی هدیه <span class="badge-soft">۲۰ هزار تومان</span></label>
+            <label class="checkbox-row"><input type="checkbox" value="insurance" onchange="updateCheckAll('demo-checks')"> بیمهٔ مرسوله</label>
+          </div>
+        </div>
+        <div style="margin-top:12px">
+          <label style="font-size:12.5px;color:var(--muted)">گروه رادیویی — کارتی با توضیح</label>
+          <div class="radio-group" id="demo-radios" role="radiogroup" aria-label="شیوه ارسال">
+            <label class="radio-card selected" onclick="pickRadio('demo-radios','post')"><input type="radio" name="demo-radio" value="post" checked><div><div class="rc-title">پست پیشتاز</div><div class="rc-desc">۳ تا ۵ روز کاری — ۴۵٬۰۰۰ تومان</div></div></label>
+            <label class="radio-card" onclick="pickRadio('demo-radios','moto')"><input type="radio" name="demo-radio" value="moto"><div><div class="rc-title">پیک موتوری</div><div class="rc-desc">امروز، فقط تهران — ۸۹٬۰۰۰ تومان</div></div></label>
+          </div>
+        </div>
+        <div style="margin-top:12px">
+          <label style="font-size:12.5px;color:var(--muted)">کنترل بخشی — قرصِ لغزان</label>
+          <div class="segmented" id="demo-seg" role="tablist" aria-label="بازه">
+            <div class="segmented-pill" id="demo-seg-pill" style="inset-inline-start:3px; width:74px"></div>
+            <button type="button" role="tab" aria-selected="true" class="active" data-value="daily" onclick="pickSeg('demo-seg','daily')">روزانه</button>
+            <button type="button" role="tab" aria-selected="false" data-value="weekly" onclick="pickSeg('demo-seg','weekly')">هفتگی</button>
+            <button type="button" role="tab" aria-selected="false" data-value="monthly" onclick="pickSeg('demo-seg','monthly')">ماهانه</button>
+          </div>
+          <div class="iran-hint" id="demo-seg-hint" style="margin-top:6px">روزانه — <span class="price">۳۱٬۲۰۰٬۰۰۰<span class="price-unit">تومان</span></span></div>
+        </div>
+      </div>
+      <div class="card" style="border-style:dashed">
+        <h4>ناوبری و نمایش — vibefarsi</h4>
+        <p class="hint">breadcrumb (جداکنندهٔ چپ‌نما) · pagination (اعداد فارسی + … + فلشِ RTL) · tabs (کیبورد + RTL) · timeline (خطِ راست + تاریخِ شمسی) · stat/table</p>
+        <div style="margin:8px 0" class="breadcrumb" aria-label="مسیر">
+          <a href="#">خانه</a><span class="sep">‹</span><a href="#">فروشگاه</a><span class="sep">‹</span><span aria-current="page"><b>هدفون بی‌سیم</b></span>
+        </div>
+        <div class="tabs" role="tablist" aria-label="تب‌ها" id="demo-tabs">
+          <button type="button" role="tab" aria-selected="true" class="active" data-tab="preview" onclick="switchTab('demo-tabs','preview')">پیش‌نمایش</button>
+          <button type="button" role="tab" aria-selected="false" data-tab="code" onclick="switchTab('demo-tabs','code')">کد</button>
+          <button type="button" role="tab" aria-selected="false" data-tab="prompt" onclick="switchTab('demo-tabs','prompt')">پرامپت</button>
+        </div>
+        <div class="tabs-panel" id="demo-tabs-preview" role="tabpanel">این‌جا پیش‌نمایش است — تبِ فعال با خطِ سبز و کیبورد (ArrowLeft/Right) کار می‌کند.</div>
+        <div class="tabs-panel" id="demo-tabs-code" role="tabpanel" style="display:none"><code>console.log('سلام')</code></div>
+        <div class="tabs-panel" id="demo-tabs-prompt" role="tabpanel" style="display:none">پرامپتِ وایب‌فارسی برای همین تب…</div>
+
+        <div class="stat-grid" style="margin-top:12px">
+          <div class="kpi"><div class="k">درآمد این ماه</div><div class="v">۲۱۶٬۰۰۰٬۰۰۰ <span style="font-size:12px;color:var(--muted)">تومان</span></div><div class="hint ok">۱۸٪ ↑</div></div>
+          <div class="kpi"><div class="k">مشتریان جدید</div><div class="v">۳۸</div><div class="hint" style="color:#b45309">۴٪ ↑</div></div>
+        </div>
+
+        <div class="timeline" aria-label="خط زمان">
+          <div class="timeline-item"><div class="timeline-date">۱ مهر ۱۴۰۵</div><div class="timeline-title">سفارش تحویل شد</div></div>
+          <div class="timeline-item"><div class="timeline-date">۳۰ شهریور ۱۴۰۵</div><div class="timeline-title">بسته ارسال شد</div><div class="timeline-desc">پست پیشتاز، کد رهگیری پیامک شد</div></div>
+          <div class="timeline-item"><div class="timeline-date">۲۹ شهریور ۱۴۰۵</div><div class="timeline-title">پرداخت تأیید شد</div></div>
+        </div>
+
+        <div class="pagination" role="navigation" aria-label="صفحه‌بندی" id="demo-pag">
+          <button type="button" aria-label="قبلی" onclick="goPage('demo-pag',-1)">‹</button>
+          <button type="button" class="active" aria-current="page" data-page="1" onclick="goPage('demo-pag',1)">۱</button>
+          <button type="button" data-page="2" onclick="goPage('demo-pag',2)">۲</button>
+          <button type="button" data-page="3" onclick="goPage('demo-pag',3)">۳</button>
+          <span class="dots">…</span>
+          <button type="button" data-page="12" onclick="goPage('demo-pag',12)">۱۲</button>
+          <button type="button" aria-label="بعدی" onclick="goPage('demo-pag',1)">›</button>
+        </div>
+        <div class="hint" id="demo-pag-hint" style="margin-top:4px">صفحهٔ ۱ از ۱۲</div>
+
+        <table style="margin-top:12px"><thead><tr><th>شماره</th><th>مشتری</th><th class="num">مبلغ</th><th>وضعیت</th></tr></thead><tbody><tr><td>#۱۴۰۵۲</td><td>مریم احمدی</td><td class="num">۲٬۸۹۰٬۰۰۰ تومان</td><td><span class="badge-soft ok">پرداخت‌شده</span></td></tr><tr><td>#۱۴۰۵۱</td><td>علی رضایی</td><td class="num">۶۴۰٬۰۰۰ تومان</td><td><span class="badge-soft warn">در انتظار</span></td></tr></tbody></table>
+      </div>
+      <div class="card" style="border-style:dashed">
+        <h4>داده و اسلایدر — vibefarsi</h4>
+        <p class="hint">data-table (سورتِ ستونِ مبلغ، فیلترِ متنی، اسکلت، empty-state، صفحه‌بندیِ ۵تایی) · carousel (RTL واقعی — اولین اسلاید راست، «بعدی» به چپ با scroll-snap)</p>
+        <div class="data-table-wrap" id="demo-dt-wrap">
+          <div class="data-table-bar">
+            <input type="text" id="demo-dt-filter" placeholder="فیلتر مشتری…" aria-label="فیلتر جدول" oninput="filterDT('demo-dt')">
+            <span class="hint" id="demo-dt-info">۱۰ مورد</span>
+            <button type="button" onclick="reloadDT('demo-dt')">بارگذاری دوباره</button>
+          </div>
+          <div id="demo-dt-skeleton" style="display:none; padding:10px"><div class="skeleton" style="height:14px; margin:6px 0"></div><div class="skeleton" style="height:14px; margin:6px 0; width:80%"></div><div class="skeleton" style="height:14px; margin:6px 0; width:60%"></div></div>
+          <table class="data-table" id="demo-dt" aria-label="جدول داده">
+            <thead><tr><th data-sort="num" onclick="sortDT('demo-dt','num')">شماره</th><th onclick="sortDT('demo-dt','name')">مشتری</th><th>تاریخ</th><th data-sort="amount" onclick="sortDT('demo-dt','amount')" class="num">مبلغ</th><th>وضعیت</th></tr></thead>
+            <tbody>
+              <tr data-name="مریم احمدی" data-amount="590000"><td>#14052</td><td>مریم احمدی</td><td>۱ مهر ۱۴۰۵</td><td class="num">۵۹۰٬۰۰۰ تومان</td><td><span class="badge-soft ok">پرداخت‌شده</span></td></tr>
+              <tr data-name="علی رضایی" data-amount="1527000"><td>#14051</td><td>علی رضایی</td><td>۳۱ شهریور ۱۴۰۵</td><td class="num">۱٬۵۲۷٬۰۰۰ تومان</td><td><span class="badge-soft warn">در انتظار</span></td></tr>
+              <tr data-name="نگار کریمی" data-amount="2464000"><td>#14050</td><td>نگار کریمی</td><td>۳۰ شهریور ۱۴۰۵</td><td class="num">۲٬۴۶۴٬۰۰۰ تومان</td><td><span class="badge-soft">ارسال‌شده</span></td></tr>
+              <tr data-name="رضا موسوی" data-amount="3401000"><td>#14049</td><td>رضا موسوی</td><td>۲۹ شهریور ۱۴۰۵</td><td class="num">۳٬۴۰۱٬۰۰۰ تومان</td><td><span class="badge-soft ok">پرداخت‌شده</span></td></tr>
+              <tr data-name="سارا محمدی" data-amount="4338000"><td>#14048</td><td>سارا محمدی</td><td>۲۸ شهریور ۱۴۰۵</td><td class="num">۴٬۳۳۸٬۰۰۰ تومان</td><td><span class="badge-soft warn">در انتظار</span></td></tr>
+              <tr data-name="حسین کریمی" data-amount="5210000"><td>#14047</td><td>حسین کریمی</td><td>۲۷ شهریور ۱۴۰۵</td><td class="num">۵٬۲۱۰٬۰۰۰ تومان</td><td><span class="badge-soft">ارسال‌شده</span></td></tr>
+              <tr data-name="فاطمه حسینی" data-amount="6150000"><td>#14046</td><td>فاطمه حسینی</td><td>۲۶ شهریور ۱۴۰۵</td><td class="num">۶٬۱۵۰٬۰۰۰ تومان</td><td><span class="badge-soft ok">پرداخت‌شده</span></td></tr>
+              <tr data-name="امیر احمدی" data-amount="7020000"><td>#14045</td><td>امیر احمدی</td><td>۲۵ شهریور ۱۴۰۵</td><td class="num">۷٬۰۲۰٬۰۰۰ تومان</td><td><span class="badge-soft warn">در انتظار</span></td></tr>
+              <tr data-name="زهرا رضایی" data-amount="8120000"><td>#14044</td><td>زهرا رضایی</td><td>۲۴ شهریور ۱۴۰۵</td><td class="num">۸٬۱۲۰٬۰۰۰ تومان</td><td><span class="badge-soft">ارسال‌شده</span></td></tr>
+              <tr data-name="محمد موسوی" data-amount="9050000"><td>#14043</td><td>محمد موسوی</td><td>۲۳ شهریور ۱۴۰۵</td><td class="num">۹٬۰۵۰٬۰۰۰ تومان</td><td><span class="badge-soft ok">پرداخت‌شده</span></td></tr>
+            </tbody>
+          </table>
+          <div id="demo-dt-empty" style="display:none; padding:24px; text-align:center"><div class="hint">نتیجه‌ای یافت نشد</div><div style="font-size:28px">🔍</div><div class="hint">فیلتر را پاک کنید</div></div>
+          <div class="pagination" id="demo-dt-pag" style="padding:8px; justify-content:center; border-top:1px solid var(--line)"><button type="button" onclick="pageDT('demo-dt',-1)">‹</button><button type="button" class="active" data-p="1" onclick="pageDT('demo-dt',1)">۱</button><button type="button" data-p="2" onclick="pageDT('demo-dt',2)">۲</button><button type="button" onclick="pageDT('demo-dt',1)">›</button></div>
+        </div>
+
+        <div class="carousel" id="demo-carousel" style="margin-top:14px" aria-label="اسلایدر محصولات" aria-roledescription="carousel">
+          <div class="carousel-track" id="demo-carousel-track">
+            <div class="carousel-card"><div class="emoji">🎧</div><div><b>محصول 1</b></div><div class="price">۹۹۰٬۰۰۰<span class="price-unit">تومان</span></div></div>
+            <div class="carousel-card"><div class="emoji">🎧</div><div><b>محصول 2</b></div><div class="price">۱٬۰۹۰٬۰۰۰<span class="price-unit">تومان</span></div></div>
+            <div class="carousel-card"><div class="emoji">🎧</div><div><b>محصول 3</b></div><div class="price">۱٬۱۹۰٬۰۰۰<span class="price-unit">تومان</span></div></div>
+            <div class="carousel-card"><div class="emoji">🎧</div><div><b>محصول 4</b></div><div class="price">۱٬۲۹۰٬۰۰۰<span class="price-unit">تومان</span></div></div>
+            <div class="carousel-card"><div class="emoji">🎧</div><div><b>محصول 5</b></div><div class="price">۱٬۳۹۰٬۰۰۰<span class="price-unit">تومان</span></div></div>
+          </div>
+          <div class="carousel-nav"><button type="button" aria-label="قبلی" onclick="carouselPrev('demo-carousel')">‹</button><button type="button" aria-label="بعدی" onclick="carouselNext('demo-carousel')">›</button></div>
+          <div class="hint" style="text-align:center">RTL واقعی — اولین اسلاید راست است و «بعدی» به چپ می‌رود</div>
+        </div>
+      </div>
+      <div class="card" style="border-style:dashed">
+        <h4>لایه‌های شناور — vibefarsi</h4>
+        <p class="hint">popover (کلیک + Esc/بیرون) · hover-card (هاور/فوکوس + پیش‌نمایش پروفایل) · context-menu (راست‌کلیک) · sheet (پنلِ کناریِ راست) · separator (خطِ «یا») · spinner</p>
+        <div class="row" style="gap:12px; flex-wrap:wrap">
+          <div class="popover-wrap" id="demo-popover">
+            <button type="button" onclick="togglePopover('demo-popover')" aria-haspopup="dialog" aria-expanded="false">فیلتر قیمت ▾</button>
+            <div class="popover-panel" role="dialog" aria-label="فیلتر قیمت"><div style="font-weight:bold; font-size:13px">فیلتر قیمت</div><div class="row" style="margin-top:8px"><input type="text" placeholder="از" style="width:90px"><span>—</span><input type="text" placeholder="تا" style="width:90px"><button class="primary" onclick="togglePopover('demo-popover')">اعمال</button></div></div>
+          </div>
+          <div class="hover-card-wrap" tabindex="0">
+            <a href="#" style="color:var(--green); text-decoration:none">@negar</a>
+            <div class="hover-card" role="dialog" aria-label="پیش‌نمایش پروفایل"><div style="display:flex; gap:10px; align-items:center"><div class="avatar" style="width:36px;height:36px;border-radius:50%;background:#eef2f7;display:flex;align-items:center;justify-content:center;font-weight:bold">ن</div><div><div style="font-weight:bold; font-size:13px">نگار کریمی</div><div class="hint">طراح محصول · تهران</div></div></div><div class="row" style="margin-top:8px"><button type="button">دنبال کردن</button><button type="button">پیام</button></div></div>
+          </div>
+          <span class="spinner" aria-label="در حال بارگذاری"></span><span class="hint">در حال بارگذاری</span>
+          <span class="spinner spinner-lg" aria-label="در حال بارگذاری"></span>
+        </div>
+        <div class="context-area" id="demo-context" oncontextmenu="openContext(event,'demo-ctx'); return false" tabindex="0" aria-label="ناحیه راست‌کلیک">این‌جا راست‌کلیک کنید</div>
+        <div class="context-menu" id="demo-ctx" role="menu" aria-label="منوی راست‌کلیک">
+          <div class="context-item" role="menuitem" onclick="closeContext('demo-ctx')">ویرایش</div>
+          <div class="context-item" role="menuitem" onclick="closeContext('demo-ctx')">کپی</div>
+          <div class="context-item" role="menuitem" style="color:var(--bad)" onclick="closeContext('demo-ctx')">حذف</div>
+        </div>
+        <div class="separator"><span>یا</span></div>
+        <div class="row">
+          <button type="button" onclick="openSheet('demo-sheet')">باز کردن فیلترها (sheet از راست)</button>
+          <span class="hint">sheet با کلیکِ بیرون یا Esc بسته می‌شود</span>
+        </div>
+        <div class="sheet-overlay" id="demo-sheet-overlay" onclick="closeSheet('demo-sheet')"></div>
+        <div class="sheet" id="demo-sheet" role="dialog" aria-modal="true" aria-label="فیلترها"><div class="sheet-head">فیلترها <button type="button" onclick="closeSheet('demo-sheet')" aria-label="بستن">×</button></div><div class="sheet-body"><label class="checkbox-row"><input type="checkbox"> فقط موجود</label><label class="checkbox-row" style="margin-top:8px"><input type="checkbox"> تخفیف‌دار</label></div></div>
+      </div>
+      <div class="card" style="border-style:dashed">
+        <h4>ورودی‌های تخصصی — vibefarsi</h4>
+        <p class="hint">time-picker (۲۴ساعته فارسی + ↑↓ + فهرست) · otp-field (۶ خانه فارسی + auto-fill) · countdown (اعداد فارسی) · collapsible (ارتفاعِ grid) · scroll-area (نازکِ هم‌رنگِ تم)</p>
+        <div class="grid2">
+          <div>
+            <label style="font-size:12.5px;color:var(--muted)">انتخاب ساعت — ۲۴ساعته</label>
+            <div class="time-picker" id="demo-time" role="group" aria-label="انتخاب ساعت">
+              <input type="text" id="time-h" value="۱۴" maxlength="2" aria-label="ساعت" oninput="validateTime('demo-time')" onkeydown="stepTime(event,'demo-time','h')"> <span>:</span> <input type="text" id="time-m" value="۳۰" maxlength="2" aria-label="دقیقه" oninput="validateTime('demo-time')" onkeydown="stepTime(event,'demo-time','m')">
+              <button type="button" aria-label="افزایش" onclick="stepTimeBtn('demo-time',1)" style="margin-inline-start:8px; border:1px solid var(--line); background:#eef2f7; border-radius:6px; width:28px; height:28px; cursor:pointer">▲</button><button type="button" aria-label="کاهش" onclick="stepTimeBtn('demo-time',-1)" style="border:1px solid var(--line); background:#eef2f7; border-radius:6px; width:28px; height:28px; cursor:pointer">▼</button>
+            </div>
+            <div class="hint" id="demo-time-hint">از ۰۸:۰۰ تا ۲۰:۰۰ — اعداد فارسی</div>
+          </div>
+          <div>
+            <label style="font-size:12.5px;color:var(--muted)">کد تأیید — ۶ خانه فارسی</label>
+            <div class="otp-group" id="demo-otp" role="group" aria-label="کد تأیید">
+              <input type="text" inputmode="numeric" maxlength="1" aria-label="رقم 1" oninput="otpNext(this,1)" onkeydown="otpBack(event,1)">
+              <input type="text" inputmode="numeric" maxlength="1" aria-label="رقم 2" oninput="otpNext(this,2)" onkeydown="otpBack(event,2)">
+              <input type="text" inputmode="numeric" maxlength="1" aria-label="رقم 3" oninput="otpNext(this,3)" onkeydown="otpBack(event,3)">
+              <input type="text" inputmode="numeric" maxlength="1" aria-label="رقم 4" oninput="otpNext(this,4)" onkeydown="otpBack(event,4)">
+              <input type="text" inputmode="numeric" maxlength="1" aria-label="رقم 5" oninput="otpNext(this,5)" onkeydown="otpBack(event,5)">
+              <input type="text" inputmode="numeric" maxlength="1" aria-label="رقم 6" oninput="otpNext(this,6)" onkeydown="otpBack(event,6)">
+            </div>
+            <div class="hint" id="demo-otp-hint">از پیامک پر می‌شود (WebOTP)</div>
+          </div>
+        </div>
+        <div style="margin-top:12px">
+          <label style="font-size:12.5px;color:var(--muted)">شمارش معکوس — اعداد فارسی</label>
+          <div class="countdown" id="demo-countdown" aria-label="شمارش معکوس" role="timer" aria-live="polite"><span id="cd-h">۰۲</span>:<span id="cd-m">۴۵</span>:<span id="cd-s">۳۰</span></div>
+          <div class="hint">برای فلش‌سیل یا لانچ</div>
+        </div>
+        <div style="margin-top:12px">
+          <div class="collapsible" id="demo-collapsible">
+            <button type="button" onclick="toggleCollapsible('demo-collapsible')" aria-expanded="false" aria-controls="coll-panel">هزینهٔ ارسال <span>۴۵٬۰۰۰ تومان</span> <span>▾</span></button>
+            <div class="collapsible-content" id="coll-panel">جزئیاتِ هزینه: ۳۰٬۰۰۰ حمل + ۱۵٬۰۰۰ بسته‌بندی — محتوا در DOM می‌ماند تا فرم حفظ شود.</div>
+          </div>
+        </div>
+        <div style="margin-top:12px">
+          <label style="font-size:12.5px;color:var(--muted)">ناحیه اسکرول — نازکِ هم‌رنگِ تم</label>
+          <div class="scroll-area" tabindex="0" aria-label="فهرست محصولات"><div>هدفون بی‌سیم پرو</div><div>کیبورد مکانیکی</div><div>ماوس ارگونومیک</div><div>مانیتور ۲۷ اینچ</div><div>پایهٔ لپ‌تاپ</div><div>هاب USB-C</div><div>وب‌کم Full HD</div><div>اسپیکر رومیزی</div><div>کابل HDMI</div><div>شارژر ۶۵ وات</div></div>
+        </div>
+      </div>
+      <div class="card" style="border-style:dashed">
+        <h4>هویت و چیدمان — vibefarsi</h4>
+        <p class="hint">avatar (حلقوی + وضعیت) · avatar-group (هم‌پوشان) · aspect-ratio (۱۶/۹) · resizable (دستگیرهٔ کششی) · theme (روشن/تیره) · bg-mesh (پس‌زمینهٔ مش)</p>
+        <div class="grid2">
+          <div>
+            <label style="font-size:12.5px;color:var(--muted)">آواتار — حلقوی با وضعیت</label>
+            <div style="display:flex; gap:10px; align-items:center; margin-top:6px">
+              <span class="avatar" id="demo-avatar" aria-label="مسعود مجربیان — آنلاین"><span>مم</span><span class="avatar-status online" aria-hidden="true"></span></span>
+              <span class="avatar sm" aria-label="کاربر مهمان — آفلاین">ناشناس</span>
+              <span class="avatar lg" style="background:#0b3d2e; color:#fff">LA</span>
+            </div>
+            <div class="avatar-group" style="margin-top:10px" aria-label="گروه اعضا">
+              <span class="avatar sm">مم</span><span class="avatar sm" style="background:#fef3c7">علی</span><span class="avatar sm" style="background:#dbeafe">سارا</span><span class="avatar sm" style="background:#e9d5ff">+۳</span>
+            </div>
+          </div>
+          <div>
+            <label style="font-size:12.5px;color:var(--muted)">نسبت تصویر — ۱۶/۹</label>
+            <div class="aspect-box aspect-16-9" id="demo-aspect"><div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:12px">۱۶:۹ — پیش‌نمایش ویدیو / نمودار</div></div>
+            <div style="margin-top:8px; display:flex; gap:6px">
+              <button class="theme-toggle" id="demo-theme-btn" onclick="toggleTheme()" aria-label="تغییر تم">🌓 روشن/تیره</button>
+              <span class="hint" id="demo-theme-hint">تم فعلی: روشن</span>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:12px">
+          <label style="font-size:12.5px;color:var(--muted)">پنل قابل‌تغییر — resizable</label>
+          <div class="resizable" id="demo-resizable">
+            <div class="resizable-pane" id="pane-a">پنل A — فهرست سیگنال‌ها<br>سطر ۱<br>سطر ۲<br>سطر ۳</div>
+            <div class="resizable-handle" id="demo-resizable-handle" role="separator" aria-orientation="vertical" aria-valuenow="50" tabindex="0" onkeydown="resizableKey(event,'demo-resizable')" onmousedown="startResize(event,'demo-resizable')" ontouchstart="startResize(event,'demo-resizable')"></div>
+            <div class="resizable-pane" id="pane-b">پنل B — جزئیات<br>نمودار ۶۰٪</div>
+          </div>
+        </div>
+        <div class="bg-mesh" style="margin-top:12px">
+          <b style="font-size:13px">پس‌زمینهٔ مش — bg-mesh</b>
+          <div class="hint">گرادیانِ ساکتِ vibefarsi — فقط تزئین، بدون وابستگیِ تصویر</div>
+        </div>
+      </div>
       </div>
       <div class="card">
         <h4>۴. چرا این‌ها «وعدهٔ پول» نیستند (و چطور با این حال پول درمی‌آید)</h4>
@@ -848,6 +1504,11 @@
       </div>
     </section>
 
+    <div class="card" id="ui-demo" style="display:none">
+      <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="72" aria-label="پیشرفت نمونه"><div class="progress-fill" style="width:72%"></div><span class="progress-label">۷۲٪</span></div>
+      <div class="skeleton" style="margin-top:8px;width:60%"></div>
+      <div class="skeleton" style="margin-top:6px;width:40%;height:10px"></div>
+    </div>
     <div class="steps-actions">
       <button onclick="go(-1)">◀ گام قبل</button>
       <button class="primary" onclick="go(1)">گام بعد ▶</button>
@@ -862,6 +1523,12 @@
   Instagram: <a href="https://instagram.com/Mojarabian.Art" target="_blank" rel="noopener">Mojarabian.Art</a>
 </footer>
 
+<div id="toast-stack" class="toast-stack" aria-live="polite" aria-atomic="false" role="status"></div>
+<div id="command-overlay" class="command-overlay" onclick="closeCommand()"></div>
+<div id="command-box" class="command-box" role="dialog" aria-modal="true" aria-label="پالت دستور">
+  <input id="command-input" class="command-input" type="text" placeholder="بگرد: گام، دستور، یا برو به…" aria-label="جستجوی دستور">
+  <div id="command-list" class="command-list" role="listbox" aria-label="دستورها"></div>
+</div>
 <script src="help.js"></script>
 <script src="app.js"></script>
 </body>

@@ -1,6 +1,6 @@
 {
   "name": "iran-desk-hf",
-  "files": 155,
+  "files": 176,
   "root": [
     "Dockerfile",
     "README-HF-FA.md",
@@ -21,6 +21,6 @@
     "render.yaml": "2adcdff48d7c2c42"
   },
   "secret_like_literals_found": 0,
-  "phone_occurrences": 15,
+  "phone_occurrences": 18,
   "note": "ساخته‌شده برای میزبان ابری مجانی: درگاه ۷۸۶۰، دروازه از متغیرهای محیطی، بدون رمز در بسته"
 }
