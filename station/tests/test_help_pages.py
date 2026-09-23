@@ -30,7 +30,8 @@ import unittest
 KEYS = [
     "s-health", "s-data", "s-settings", "s-news", "s-run", "s-decide",
     "s-backtest", "s-bundle", "s-trial", "s-blind", "s-math",
-    "proof", "admin", "login", "guide",
+    "proof", "admin", "admin-login", "admin-health", "admin-license",
+    "admin-state", "admin-usage", "admin-users", "admin-audit", "login", "guide",
 ]
 
 BANNED = (
@@ -86,7 +87,14 @@ class HelpContentTests(unittest.TestCase):
             "s-blind": ["پرسش", "حساب‌رسی", "پیمان‌نامه"],
             "s-math": ["شوک", "ورشکستگی", "راهبرد"],
             "proof": ["پس‌آزمایی", "بسته تحویل", "دفتر سرمایه‌گر", "آزمون کور", "راهبردها"],
-            "admin": ["سلامت", "مجوز", "پشتیبان", "کاربران", "گواهی"],
+            "admin": ["سلامت", "مجوز", "پشتیبان", "کاربران", "گواهی", "لاگ"],
+            "admin-login": ["توکن", "خروج", "پنج تلاش"],
+            "admin-health": ["سبز", "قرمز", "عیب‌یابی"],
+            "admin-license": ["انقضا", "باطل", "آزمون ارزیابی"],
+            "admin-state": ["نگهبان", "پشتیبان‌گیری الان", "مخزن"],
+            "admin-usage": ["شمارش", "گواهی", "امضا"],
+            "admin-users": ["ساخت کاربر", "حذف کامل", "حساب مدیر"],
+            "admin-audit": ["کپی", "پاک کردن", "ریست", "آرشیو"],
             "login": ["شناسه", "رمز", "ورود"],
             "guide": ["روز اول", "شصت ثانیه", "پرسش‌های پرتکرار"],
         }
@@ -125,6 +133,19 @@ class HelpWiringTests(unittest.TestCase):
         self.assertIn('openHelp("s-" + s[0])', APP)
         self.assertIn('openHelp("proof")', APP)
         self.assertIn("nav-sep", APP)
+
+
+    def test_admin_panel_has_per_section_help_buttons(self):
+        """هر بخشِ پنلِ مدیریت، کلیدِ «؟ راهنمای این بخش» جداگانه دارد."""
+        for key in ("admin-login", "admin-health", "admin-license", "admin-state",
+                    "admin-usage", "admin-users", "admin-audit"):
+            self.assertIn(f"openHelp('{key}')", ADMIN, key)
+        self.assertEqual(ADMIN.count("راهنمای این بخش"), 7)
+
+    def test_admin_help_requires_admin_login(self):
+        """راهنماهای پنلِ مدیریت فقط با توکنِ مدیر (ورود با آی‌دی مدیر) باز می‌شوند."""
+        self.assertIn("station-admin-token", HELP)
+        self.assertIn("ابتدا با شناسه و رمزِ مدیر", HELP)
 
 
 if __name__ == "__main__":
