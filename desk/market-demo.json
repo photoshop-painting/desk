@@ -1,0 +1,36 @@
+{
+  "as_of": "2026-09-22",
+  "hurdle": 0.39,
+  "capital": 20000000000,
+  "note": "اعداد این اسنپ‌شات نمونه و ساختگی‌اند و قیمت واقعی بازار نیستند؛ فقط برای نمایش کارکرد میز معاملات ساخته شده‌اند. وجه تضمین‌ها به ریال است.",
+  "rows": [
+    {"symbol": "اهرم", "kind": "basis", "spot": 20000, "future": 22800, "days": 90, "storage_annual": 0.0,
+     "margin_per_contract": 20000000, "unit": "قرارداد",
+     "liquidity_contracts_per_day": 900, "spread_pct": 0.005, "leverage_used": 1},
+
+    {"symbol": "فولاد", "kind": "covered_call", "spot": 7000, "strike": 7600, "premium": 400, "days": 45,
+     "margin_per_contract": 7000, "unit": "سهم",
+     "liquidity_contracts_per_day": 160, "spread_pct": 0.018},
+
+    {"symbol": "کگل", "kind": "tabei", "stock_price": 9800, "put_price": 40, "strike": 14210, "days": 365,
+     "margin_per_contract": 9840, "unit": "سهم",
+     "liquidity_contracts_per_day": 240, "spread_pct": 0.02},
+
+    {"symbol": "خساپا", "kind": "tabei", "stock_price": 2500, "put_price": 12, "strike": 3000, "days": 270,
+     "margin_per_contract": 2512, "unit": "سهم",
+     "liquidity_contracts_per_day": 320, "spread_pct": 0.012},
+
+    {"symbol": "طلا", "kind": "basis", "spot": 20000, "future": 20600, "days": 60, "storage_annual": 0.01,
+     "margin_per_contract": 20000000, "unit": "قرارداد",
+     "liquidity_contracts_per_day": 700, "spread_pct": 0.006},
+
+    {"symbol": "شپنا", "kind": "box", "call_low": 300, "put_low": 430, "call_high": 175, "put_high": 585,
+     "strike_low": 1200, "strike_high": 1500, "days": 45,
+     "margin_per_contract": 250000, "unit": "قرارداد",
+     "liquidity_contracts_per_day": 12, "spread_pct": 0.045},
+
+    {"symbol": "وبملت", "kind": "parity", "call": 420, "put": 380, "spot": 9000, "strike": 9000, "days": 30, "rate": 0.39,
+     "margin_per_contract": 9000, "unit": "سهم",
+     "liquidity_contracts_per_day": 80, "spread_pct": 0.02}
+  ]
+}

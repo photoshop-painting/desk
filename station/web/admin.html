@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>پنل مدیریت ایستگاه — دسترسی محدود</title>
+<style>
+  :root { --green:#0b3d2e; --ink:#1d1d1f; --muted:#6b7280; --line:#e3e6ea; --bg:#f6f7f9;
+          --ok:#0a7d33; --bad:#b3261e; --warnbg:#fff8e1; --warnline:#f0e0a8; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+         font-family: Tahoma, "Segoe UI", Vazirmatn, "Noto Naskh Arabic", sans-serif; line-height:1.9; }
+  header { background:var(--green); color:#fff; padding:14px 20px; }
+  header h1 { margin:0 0 4px; font-size:19px; }
+  header .meta { font-size:12px; opacity:.9; }
+  header .badge { display:inline-block; margin-top:6px; background:#ffffff1a; border:1px solid #ffffff40;
+                  border-radius:20px; padding:2px 10px; font-size:12px; }
+  main { max-width: 980px; margin: 0 auto; padding:16px 18px 60px; }
+  h3 { font-size:17px; margin:6px 0 6px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px 14px; margin:10px 0; }
+  .card h4 { margin:0 0 8px; font-size:14px; }
+  .hint { color:var(--muted); font-size:12.5px; }
+  .warn { background:var(--warnbg); border:1px solid var(--warnline); border-radius:10px; padding:10px 12px;
+          font-size:13px; }
+  .ok { background:#e6f6ec; border:1px solid #b7e2c6; border-radius:10px; padding:10px 12px; font-size:13px; }
+  label { font-size:13px; display:block; margin:6px 0 2px; }
+  input[type=text], input[type=number], input[type=password], select {
+     width:100%; padding:7px 9px; border:1px solid var(--line); border-radius:8px; font:inherit;
+     font-size:13px; direction:ltr; }
+  input.fa { direction:rtl; }
+  .row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:8px 0; }
+  button { font:inherit; font-size:13px; padding:7px 12px; border-radius:8px; border:1px solid var(--line);
+           background:#fff; cursor:pointer; }
+  button:hover { background:#f0f4f3; }
+  button.primary { background:var(--green); color:#fff; border-color:var(--green); }
+  button.primary:hover { background:#0d4a37; }
+  button.ghost { background:transparent; }
+  .log { background:#0f172a; color:#d8e2f0; border-radius:8px; padding:10px 12px; font-size:12.5px;
+         white-space:pre-wrap; min-height:44px; direction:rtl; font-family: Tahoma, monospace;
+         max-height:340px; overflow:auto; }
+  table { width:100%; border-collapse:collapse; font-size:13px; margin-top:6px; }
+  th, td { border-bottom:1px solid var(--line); padding:6px 8px; text-align:right; }
+  th { background:#f3f6f8; font-size:12.5px; }
+  .kpi { display:flex; flex-wrap:wrap; gap:8px; margin:8px 0; }
+  .kpi div { border:1px solid var(--line); border-radius:9px; padding:8px 10px; background:#fbfcfe; min-width:150px; }
+  .kpi b { display:block; font-size:16px; }
+  .kpi span { font-size:12px; color:var(--muted); }
+  .foot { margin-top:22px; padding-top:12px; border-top:1px solid var(--line); color:var(--muted); font-size:12.5px; }
+  .foot a { color:#2b5fb0; text-decoration:none; }
+  .hidden { display:none; }
+  code { background:#f2f4f8; padding:1px 5px; border-radius:5px; font-size:12.5px; direction:ltr;
+         display:inline-block; }
+</style>
+</head>
+<body>
+<header>
+  <h1>پنل مدیریت ایستگاه تصمیم مشتقه</h1>
+  <div class="meta">بررسی سلامت · مجوز دسترسی و گزارش عیب‌یابی · گواهی استفادهٔ موفق</div>
+  <div class="badge" id="who">وارد نشده‌اید</div>
+</header>
+
+<main>
+  <div class="warn">
+    این پنل برای خودِ ارائه‌دهنده است، نه برای مشتری. ورود با شناسه و رمز انجام می‌شود و توکن ورود
+    یک‌ساعته است؛ اگر این صفحه را روی شبکه باز کرده‌اید، پشت <code>https</code> بگذارید.
+  </div>
+
+  <section class="card" id="login-card">
+    <h4>ورود به پنل</h4>
+    <div class="row">
+      <div style="flex:1 1 200px">
+        <label for="admin-id">شناسهٔ ورود</label>
+        <input type="text" id="admin-id" autocomplete="username" placeholder="admin">
+      </div>
+      <div style="flex:1 1 200px">
+        <label for="admin-password">رمز</label>
+        <input type="password" id="admin-password" autocomplete="current-password" placeholder="••••••••">
+      </div>
+    </div>
+    <div class="row">
+      <button class="primary" onclick="doLogin()">ورود</button>
+      <button class="ghost" onclick="logout()">خروج</button>
+      <span class="hint" id="login-hint">پنج تلاش ناموفق در پنج دقیقه، ورود را موقتاً می‌بندد.</span>
+    </div>
+    <div class="log" id="login-box">آماده.</div>
+  </section>
+
+  <div id="admin-area" class="hidden">
+
+    <section class="card">
+      <h4>۱. بررسی سلامت برنامه</h4>
+      <p class="hint">نسخه‌ها، سلامت اجزا (پایتون، tkinter، پرونده‌ها، مسیر داده) و آمادگی اتصال را
+      می‌سنجد. خروجی همین بررسی، سرِ گزارش عیب‌یابی هم می‌رود.</p>
+      <div class="row">
+        <button class="primary" onclick="doHealth()">بررسی سلامت برنامه</button>
+      </div>
+      <div id="health-table"><div class="hint">هنوز بررسی نشده است.</div></div>
+      <div class="log" id="log-health">آماده.</div>
+    </section>
+
+    <section class="card">
+      <h4>۲. مجوز دسترسی، پشتیبانی و گزارش عیب‌یابی</h4>
+      <p class="hint">این برنامه «فروش نسخه» نیست؛ اجازه‌نامهٔ دسترسی نام‌دار و زمان‌دار است. این‌جا
+      برای هر شرکت مجوز بسازید (نام، مدت، شمارهٔ پیش‌فاکتور/تماس) و در جلسه نشان دهید.</p>
+      <div class="row">
+        <div style="flex:2 1 220px">
+          <label for="lic-client">نام شرکت / مشتری</label>
+          <input type="text" class="fa" id="lic-client" placeholder="مثلاً: کارگزاری نمونه">
+        </div>
+        <div style="flex:0 1 120px">
+          <label for="lic-months">مدت (ماه)</label>
+          <input type="number" id="lic-months" value="12" min="1" max="60">
+        </div>
+        <div style="flex:1 1 180px">
+          <label for="lic-contact">راه تماس / شمارهٔ پیش‌فاکتور</label>
+          <input type="text" id="lic-contact" placeholder="اختیاری">
+        </div>
+      </div>
+      <div class="row">
+        <button class="primary" onclick="grantLicense()">صدور مجوز دسترسی</button>
+        <button onclick="licenseStatus()">وضعیت مجوز</button>
+        <button onclick="makeTrialLicense()">مجوز آزمون ارزیابی</button>
+        <button onclick="revokeLicense()">باطل‌کردن مجوز</button>
+      </div>
+      <div class="row">
+        <button onclick="runDiagnose()">ساخت گزارش عیب‌یابی</button>
+
+      <h4>۳. پشتیبان ابری وضعیت (نگهبان همیشه‌روشن)</h4>
+      <p class="hint">روی میزبان ابری، دیسک بادوام نیست؛ پس «نگهبان» هر چند دقیقه وضعیت ساخته‌شدهٔ
+      شما (شماره‌های کارگزاری، روزهای ثبت‌شده، خروجی‌های چاپی) را در مخزن دادهٔ خصوصی خودتان
+      نگه می‌دارد و سرِ روشن‌شدن برمی‌گرداند. این‌جا می‌بینید آخرین پشتیبان کِی بوده و
+      می‌توانید همین حالا یکی بگیرید.</p>
+      <div class="btns">
+        <button onclick="loadStateInfo()">نمایش وضعیت نگهبان</button>
+        <button onclick="backupNow()">پشتیبان‌گیری الان</button>
+      </div>
+      <div id="state-box" class="hint">وضعیت نگهبان هنوز خوانده نشده است.</div>
+      <div id="log-state" class="hint"></div>
+        <button onclick="openAdminFile('diagnostic')">نمایش گزارش عیب‌یابی</button>
+        <button onclick="licenseDocument()">ساخت سند مجوز (چاپی)</button>
+        <button onclick="openAdminFile('license-doc')">نمایش سند مجوز</button>
+        <button onclick="openAdminFile('grant-doc')">سند «بفروشم یا دسترسی بدهم؟»</button>
+      </div>
+      <div id="license-state"><div class="hint">وضعیت مجوز خوانده نشده است.</div></div>
+      <div class="log" id="log-access">آماده.</div>
+    </section>
+
+    <section class="card">
+      <h4>۳. گواهی استفادهٔ موفق — «شرکت چقدر از برنامه استفاده کرد؟»</h4>
+      <p class="hint">هر کار موفق (داوری سیگنال، تصمیم ثبت‌شده، مراسم روزانه، آزمون‌ها، بستهٔ شاهد) در یک
+      دفتر محلی و زنجیره‌هش‌دار روی همین رایانه ثبت می‌شود. هیچ دادهٔ معاملاتی، شمارهٔ حساب یا نام
+      شخصی داخلش نیست و جایی فرستاده نمی‌شود. گواهی دو امضا دارد: شما و شرکت.</p>
+      <div class="row">
+        <div style="flex:1 1 220px">
+          <label for="usage-client">نام شرکت (برای گواهی)</label>
+          <input type="text" class="fa" id="usage-client" placeholder="مثلاً: کارگزاری نمونه">
+        </div>
+      </div>
+      <div class="row">
+        <button onclick="loadUsage()">شمارش استفاده</button>
+        <button class="primary" onclick="buildUsageStatement()">ساخت گواهی استفاده</button>
+        <button onclick="openAdminFile('usage')">نمایش گواهی</button>
+      </div>
+      <div class="kpi" id="usage-kpis"></div>
+      <div class="log" id="usage-box">هنوز خوانده نشده است.</div>
+    </section>
+
+    <section class="card">
+      <h4>۴. کاربران — شناسه و رمز را خودت می‌سازی، هر وقت خواستی حذف می‌کنی</h4>
+      <p class="hint">هر کاربر با شناسه و رمز خودش وارد برنامه می‌شود و نقش «مهمان» را دارد:
+      همهٔ یازده گام و برگه‌های چاپی را می‌بیند، ولی پنل مدیریت، صدور مجوز، عوض‌کردن رمزها،
+      و خاموش‌کردن برنامه دستش نیست. رمز فقط هش‌شده ذخیره می‌شود. «حذف» همان لحظه نشست بازِ آن
+      کاربر را هم می‌بندد.</p>
+      <div class="row">
+        <div style="flex:1 1 160px">
+          <label for="new-user-id">شناسهٔ کاربر تازه</label>
+          <input type="text" id="new-user-id" placeholder="مثلاً: ali">
+        </div>
+        <div style="flex:1 1 160px">
+          <label for="new-user-pass">رمز</label>
+          <input type="password" id="new-user-pass" placeholder="دست‌کم ۸ نویسه">
+        </div>
+        <div style="flex:1 1 160px">
+          <label for="new-user-note">یادداشت (اختیاری)</label>
+          <input type="text" class="fa" id="new-user-note" placeholder="مثلاً: کارشناس شرکت">
+        </div>
+      </div>
+      <div class="row">
+        <button class="primary" onclick="addUser()">ساخت کاربر</button>
+        <button onclick="loadUsers()">خواندن فهرست</button>
+      </div>
+      <div id="users-table"><div class="hint">برای دیدن فهرست، «خواندن فهرست» را بزن.</div></div>
+      <div class="log" id="log-users">آماده.</div>
+      <h4 style="margin-top:18px">حساب مدیر (خودت) — شناسه و رمز را خودت تعیین می‌کنی</h4>
+      <p class="hint">این همان حسابی است که با آن وارد برنامه و پنل می‌شوی. بعد از عوض‌کردن،
+      با شناسهٔ تازه وارد شو و رمز را جایی امن نگه دار (رمز روی دیسک فقط هش‌شده است).</p>
+      <div class="row">
+        <div style="flex:1 1 160px">
+          <label for="admin-new-id">شناسهٔ تازهٔ مدیر</label>
+          <input type="text" id="admin-new-id" placeholder="مثلاً: mafhoom">
+        </div>
+        <div style="flex:1 1 160px">
+          <label for="admin-new-pass">رمز تازه</label>
+          <input type="password" id="admin-new-pass" placeholder="دست‌کم ۸ نویسه">
+        </div>
+      </div>
+      <div class="row">
+        <button onclick="setAdminCreds()">ذخیرهٔ شناسه/رمز مدیر</button>
+      </div>
+      <div class="log" id="log-admin-creds">آماده.</div>
+    </section>
+
+  </div>
+
+  <p class="foot" id="dev-credit"></p>
+</main>
+
+<script src="admin.js"></script>
+</body>
+</html>

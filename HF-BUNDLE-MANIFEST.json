@@ -1,0 +1,26 @@
+{
+  "name": "iran-desk-hf",
+  "files": 151,
+  "root": [
+    "Dockerfile",
+    "README-HF-FA.md",
+    "README.md",
+    "boot.sh",
+    "desk",
+    "kodal-alert",
+    "render.yaml",
+    "station",
+    "strategies",
+    "tools"
+  ],
+  "key_files": {
+    "Dockerfile": "75f5b5fb5e72b595",
+    "README.md": "b00e906f1d15480b",
+    "boot.sh": "f1d653f2956f7ab1",
+    "README-HF-FA.md": "7fa085a85f68a812",
+    "render.yaml": "2adcdff48d7c2c42"
+  },
+  "secret_like_literals_found": 0,
+  "phone_occurrences": 15,
+  "note": "ساخته‌شده برای میزبان ابری مجانی: درگاه ۷۸۶۰، دروازه از متغیرهای محیطی، بدون رمز در بسته"
+}

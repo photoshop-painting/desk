@@ -1,0 +1,18 @@
+{
+  "capital": 5000000000,
+  "hurdle": 0.39,
+  "min_edge_arbitrage_pct": 3.0,
+  "min_edge_leveraged_pct": 5.0,
+  "max_margin_pct": 0.2,
+  "max_positions": 3,
+  "min_liquidity_contracts_per_day": 20,
+  "max_spread_pct": 0.03,
+  "alert_score_threshold": 60,
+  "desk_db": "",
+  "report_path": "",
+  "credit": "تهیه‌کننده: Masoud Mojarabian · https://www.instagram.com/Mojarabian.Art/ · tel:+989126630554 · https://t.me/Mojarabian",
+  "report_title": "میز معاملات — داشبورد تصمیم",
+  "max_position_pct": 0.35,
+  "max_plausible_arb_pct": 250.0,
+  "max_plausible_lev_pct": 400.0
+}

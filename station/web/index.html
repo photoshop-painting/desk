@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ایستگاه تصمیم مشتقه — نسخهٔ ۰٫۱٫۰</title>
+<style>
+  :root { --green:#0b3d2e; --ink:#1d1d1f; --muted:#6b7280; --line:#e3e6ea; --bg:#f6f7f9;
+          --ok:#0a7d33; --bad:#b3261e; --warnbg:#fff8e1; --warnline:#f0e0a8; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+         font-family: Tahoma, "Segoe UI", Vazirmatn, "Noto Naskh Arabic", sans-serif; line-height:1.9; }
+  header { background:var(--green); color:#fff; padding:14px 20px; }
+  header h1 { margin:0 0 4px; font-size:19px; }
+  header .meta { font-size:12px; opacity:.9; }
+  header .badge { display:inline-block; margin-top:6px; background:#ffffff1a; border:1px solid #ffffff40;
+                  border-radius:20px; padding:2px 10px; font-size:12px; }
+  .layout { display:flex; gap:0; align-items:flex-start; min-height: calc(100vh - 92px); }
+  nav { width:255px; background:#fff; border-left:1px solid var(--line); padding:12px 8px; position:sticky; top:0; }
+  nav h2 { font-size:13px; margin:4px 8px 8px; color:var(--muted); }
+  nav a { display:block; padding:8px 10px; border-radius:8px; color:var(--ink); text-decoration:none; font-size:13.5px;
+          margin-bottom:3px; border:1px solid transparent; }
+  nav a:hover { background:#f0f4f3; }
+  nav a.active { background:#d7e6df; border-color:#bcd8cd; font-weight:bold; }
+  nav a .n { display:inline-block; width:20px; height:20px; line-height:20px; text-align:center; border-radius:50%;
+             background:#eef2f7; font-size:11.5px; margin-left:6px; }
+  nav a.done .n { background:var(--ok); color:#fff; }
+  main { flex:1; padding:16px 20px 60px; min-width:0; }
+  section { display:none; }
+  section.active { display:block; }
+  h3 { font-size:17px; margin:6px 0 6px; }
+  .lead { font-size:13px; color:#374151; margin:0 0 12px; white-space:pre-line; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px 14px; margin:10px 0; }
+  .card h4 { margin:0 0 8px; font-size:14px; }
+  .warn { background:var(--warnbg); border:1px solid var(--warnline); border-radius:10px; padding:10px 12px; font-size:13px; }
+  .grid2 { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap:10px; }
+  label { font-size:13px; display:block; margin:6px 0 2px; }
+  input[type=text], input[type=number], input[type=password], select, textarea {
+     width:100%; padding:7px 9px; border:1px solid var(--line); border-radius:8px; font:inherit; font-size:13px; direction:ltr; }
+  textarea { direction:rtl; min-height:70px; }
+  button { font:inherit; font-size:13px; padding:8px 14px; border-radius:9px; border:1px solid #bcd8cd;
+           background:#eaf5f0; cursor:pointer; margin:2px; }
+  button.primary { background:var(--green); color:#fff; border-color:var(--green); font-weight:bold; }
+  button.danger { background:#fdecea; border-color:#f3c3bd; color:#8a1c14; }
+  button:disabled { opacity:.5; cursor:not-allowed; }
+  .row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+  table { width:100%; border-collapse:collapse; background:#fff; font-size:12.5px; }
+  th,td { border-bottom:1px solid var(--line); padding:6px 8px; text-align:right; vertical-align:top; }
+  th { background:#eef2f7; font-size:12px; }
+  td.num, th.num { font-variant-numeric: tabular-nums; }
+  .ok { color:var(--ok); font-weight:bold; }
+  .bad { color:var(--bad); }
+  .pill { display:inline-block; border-radius:12px; padding:1px 9px; font-size:11.5px; color:#fff; }
+  .pill.pending { background:#8a6d00; } .pill.approved { background:#0a7d33; } .pill.rejected { background:#b3261e; }
+  .log { background:#0f172a; color:#d7e6dd; font-family:Consolas, monospace; font-size:12px; padding:9px 11px;
+         border-radius:10px; max-height:230px; overflow:auto; white-space:pre-wrap; direction:rtl; }
+  .cards { display:grid; grid-template-columns: repeat(auto-fit, minmax(165px,1fr)); gap:9px; margin:10px 0; }
+  .kpi { background:#fff; border:1px solid var(--line); border-radius:10px; padding:9px 11px; }
+  .kpi .k { font-size:11.5px; color:var(--muted); }
+  .kpi .v { font-size:16px; font-weight:bold; margin-top:2px; font-variant-numeric: tabular-nums; }
+  .steps-actions { display:flex; justify-content:space-between; margin-top:16px; }
+  code { background:#eef2f7; padding:1px 5px; border-radius:4px; font-family:Consolas, monospace; direction:ltr;
+         display:inline-block; }
+  details { background:#fff; border:1px solid var(--line); border-radius:10px; padding:8px 12px; margin:8px 0; }
+  summary { cursor:pointer; font-size:13.5px; font-weight:bold; }
+  .hint { font-size:12.5px; color:var(--muted); }
+  iframe { width:100%; height:640px; border:1px solid var(--line); border-radius:10px; background:#fff; }
+  .busy { display:none; }
+  .busy.on { display:inline-block; }
+  @media (max-width: 900px) { nav { display:none; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>ایستگاه تصمیم مشتقه</h1>
+  <div class="meta"><b>خرید و فروش اوراق مشتقه</b> — گام‌های واجب: داده ← سرمایهٔ شما ← اجرا ← <b>تصمیمِ خرید و فروش</b> · (پنج گامِ آخر، اثباتِ اختیاریِ برنامه برای سرمایه‌گذار)</div>
+  <div class="badge" id="badge">منبع داده: تنظیم نشده</div>
+  <div class="badge" id="whoami" style="background:#eef2ff;color:#3730a3">دسترسی: در حال بررسی…</div>
+  <button onclick="logoutApp()" style="margin-top:4px" id="logout-btn">خروج</button>
+</header>
+
+<div class="layout">
+  <nav id="nav">
+    <h2>گام‌ها</h2>
+  </nav>
+
+  <main>
+    <!-- ۱ -->
+    <section id="s-health">
+      <h3>۱. خوش‌آمد</h3>
+      <div class="card" id="hero-card" style="border:2px solid #0b3d2e;background:#eaf5f0;padding:16px 18px">
+        <h3 style="font-size:21px;margin:0 0 6px;color:#0b3d2e">📈 خرید و فروشِ اوراق مشتقه — سیگنالِ امروز</h3>
+        <p style="margin:0;font-size:14px">کارِ شما در این ایستگاه یک چیز است: <b>بفهمی چه بخری، چه بفروشی، چقدر، و چرا.</b>
+        ایستگاه عدد، دلیل، کارمزد و فاصله تا خطر را روی میز می‌گذارد؛ <b>سفارش را خودتان</b> در سامانهٔ کارگزاری ثبت می‌کنید —
+        یعنی تصمیم روی عدد است، نه روی حدس.<br>
+        کارِ امروز، چهار گام: <b>۱ دادهٔ امروز ← ۲ سرمایه‌ات ← ۳ اجرا ← ۴ تصمیمِ خرید و فروش</b></p>
+        <button class="primary" style="margin-top:10px;font-size:14px" onclick="showStep(5)">برو به تصمیمِ امروزِ خرید و فروش →</button>
+      </div>
+      <p class="lead">این ایستگاه «کجا تفاوت قیمت‌ها از حاشیهٔ اطمینان عبور می‌کند» را پیدا می‌کند،
+هشدارهای کدال را کنار همان سیگنال می‌گذارد و اندازهٔ هر موقعیت را از بودجهٔ وجه تضمین درمی‌آورد.
+گام‌های ۷ تا ۱۱ (پس‌آزمایی، بستهٔ تحویل، آزمون‌ها، ریاضی) برای اثباتِ برنامه به سرمایه‌گر و کارفرما هستند
+و برای کارِ روزانه لازم نیستند.</p>
+      <p style="text-align:left;margin:6px 2px"><a href="/guide" style="color:#0b3d2e">راهنمای کارفرما</a></p>
+      <div class="card" id="gate-card" style="display:none">
+        <h4>کاربران (کارفرما و همکاران) و کلید خاموشی — فقط مدیر</h4>
+        <p class="hint">هر کاربری که بسازی (این‌جا یا در <a href="/admin">پنل مدیریت</a>) با شناسه و رمز
+        خودش وارد می‌شود و همه‌چیز را می‌بیند و تست می‌کند؛ ولی صدور مجوز، پنل مدیریت، عوض‌کردن رمزها و
+        خاموش‌کردن برنامه برای او بسته است. هر وقت خواستی، «حذف کامل» دسترسی‌اش را همان لحظه می‌بندد.
+        <b>چند کاربر:</b> در پنل مدیریت، کارت «۴. کاربران».</p>
+        <div class="kpi" id="gate-state">در حال خواندن وضعیت…</div>
+        <div class="row">
+          <input type="text" id="new-gate-user" placeholder="شناسهٔ کاربر تازه (مثلاً ali)" style="min-width:190px">
+          <input type="password" id="new-gate-pass" placeholder="رمز (دست‌کم ۸ نویسه)" style="min-width:190px">
+          <input type="text" id="new-gate-note" placeholder="یادداشت (اختیاری)" style="min-width:150px">
+          <button class="primary" onclick="addGateUser()">ساخت کاربر</button>
+        </div>
+        <div id="gate-users" class="hint">برای دیدن کاربران، وضعیت خوانده می‌شود.</div>
+        <div class="row">
+          <input type="text" id="guest-id" placeholder="شناسهٔ مهمانِ قدیمی (مثلاً masoud)" style="min-width:200px">
+          <input type="password" id="guest-pass" placeholder="رمز مهمانِ قدیمی (دست‌کم ۸ نویسه)" style="min-width:200px">
+          <button onclick="saveGuest()">ذخیره/عوض‌کردن رمز مهمانِ قدیمی</button>
+          <button onclick="gateAction('guest-on')">روشن‌کردن دسترسی مهمان</button>
+          <button class="primary" onclick="gateAction('guest-off')">قطع دسترسی مهمان</button>
+          <button onclick="gateAction('close-guest-sessions')">بستن نشست‌های باز مهمان</button>
+        </div>
+        <div class="row">
+          <button onclick="gateAction('gate-on')">روشن‌کردن دروازهٔ ورود</button>
+          <button onclick="gateAction('gate-off')">خاموش‌کردن دروازه</button>
+          <button onclick="shutdownApp()" style="background:#b91c1c;color:#fff">خاموش کردن برنامه</button>
+        </div>
+        <p class="hint">«خاموش کردن برنامه» همین حالا اجرا را می‌بندد؛ برای روشن‌کردن دوباره همان
+        میان‌بر/فرمان همیشگی را بزنید. اگر لینک کارفرما را بستید، او همان لحظه بیرون می‌افتد.</p>
+        <div class="log" id="log-gate">آماده.</div>
+      </div>
+      <div class="card" id="card-access">
+        <h4>پنل مدیریت (دسترسی محدود)</h4>
+        <p class="hint">بررسی سلامت برنامه، صدور مجوز دسترسی و گزارش عیب‌یابی، و گواهی استفادهٔ موفق
+        به <b>پنل مدیریت</b> منتقل شده‌اند و با شناسه و رمز باز می‌شوند.</p>
+        <div class="row">
+          <button class="primary" onclick="openAdminPanel()">باز کردن پنل مدیریت</button>
+          <span class="hint">دسترسی با شناسه و رمز؛ توکن ورود یک‌ساعته است.</span>
+        </div>
+      </div>
+      <div class="card">
+        <h4>این ایستگاه برای چه کسی ساخته شده</h4>
+        <p class="hint">برای معامله‌گری که می‌خواهد پیش از هر سفارش، «عدد، کارمزد، شانس و فاصله تا
+        اخطاریهٔ مارجین‌کال» را ببیند و بتواند همه را بازتولید کند. اگر تازه‌کارید، از گام ۲ شروع
+        کنید: راهنمای ستون‌به‌ستون و مسیر اتصال آن‌جا است.</p>
+      </div>
+    </section>
+
+    <section id="s-data">
+      <h3>۲. منبع داده</h3>
+      <p class="lead">یکی از سه مسیر را انتخاب کنید. «زندهٔ واقعی» یعنی قیمت‌ها خودکار به‌روز می‌شوند؛
+اما تا کلید نخریده‌اید، با دادهٔ نمونه یا پروندهٔ دستی هم می‌توانید تمام گام‌ها را ببینید.
+برای همهٔ حالت‌ها، وجه تضمین و مشخصات قرارداد از سامانهٔ کارگزاری خودتان می‌آید.</p>
+      <div class="card">
+        <div class="row">
+          <label><input type="radio" name="mode" value="sim" checked onchange="pickMode()"> دادهٔ نمونهٔ همراه برنامه</label>
+          <label><input type="radio" name="mode" value="file" onchange="pickMode()"> پروندهٔ دستی JSON (بدون هزینه)</label>
+          <label><input type="radio" name="mode" value="live" onchange="pickMode()"> دادهٔ زندهٔ واقعی (سرویس خریدنی)</label>
+        </div>
+        <div id="mode-text" class="warn" style="margin-top:8px"></div>
+      </div>
+
+      <div class="card" id="card-file">
+        <h4>پروندهٔ اسنپ‌شات (برای حالت دستی، و پایهٔ حالت زنده)</h4>
+        <div class="row">
+          <input type="text" id="file-path" placeholder="/home/.../snapshot.json" style="flex:1;min-width:280px">
+          <button onclick="makeTemplate()">ساخت قالب نمونه</button>
+          <button class="primary" onclick="testData()">آزمایش خواندن این پرونده</button>
+        </div>
+        <p class="hint">قالب را با اعداد واقعی کارگزاری پر کنید: قیمت پایه، آتی، زنجیرهٔ آپشن، تبعی، و وجه تضمین هر قرارداد.</p>
+      </div>
+
+      <div class="card" id="card-live">
+        <h4>اتصال سرویس دادهٔ زنده (کلید و قالب نشانی)</h4>
+        <div class="grid2">
+          <div><label>قالب نشانی سرویس (نمونه: https://api.example.ir/Quote.php?key={key}&amp;l18={symbol})</label>
+            <input type="text" id="live-url" placeholder="https://api.foo.ir/quote?key={key}&l18={symbol}"></div>
+          <div><label>مسیر قیمت در پاسخ JSON (نمونه: data.0.pl)</label>
+            <input type="text" id="live-path" value="data.0.pl"></div>
+          <div><label>نام هدر کلید (اختیاری)</label><input type="text" id="live-header" placeholder="Authorization"></div>
+          <div><label>نام پارامتر کلید در نشانی</label><input type="text" id="live-qname" value="key"></div>
+          <div><label>کلید سرویس (فقط روی همین رایانه در حافظه می‌ماند)</label>
+            <input type="password" id="live-key" placeholder="کلید را اینجا بگذارید"></div>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <button class="primary" onclick="testLive()">آزمایش اتصال و خواندن قیمت زنده</button>
+          <span class="hint">اگر سرویس ایرانی باشد، باید از داخل ایران اجرا شود.</span>
+        </div>
+      </div>
+
+
+      <div class="card" id="card-sources">
+        <h4>امکان‌سنجی مسیرهای داده: ببینید قبل از خرید چه چیزی واقعاً کار می‌کند</h4>
+        <p class="hint">همهٔ نشانی‌های رایگان سایت مرجع را می‌زند، پاسخ را می‌خواند، می‌گوید کدام میدان
+        دادهٔ موتور از آن درمی‌آید، چقدر طول می‌کشد، و با دو فراخوانی پشت‌سرهم می‌سنجد که داده تازه
+        می‌شود یا بی‌حرکت می‌مانَد. اگر نشانی پوش لحظه‌ای (websocket) دارید، وضعیت دسترسی‌اش را هم می‌گوید.</p>
+        <div class="row">
+          <input type="text" id="src-symbol" placeholder="نماد، مثل فولاد" style="min-width:150px">
+          <input type="text" id="src-ws" placeholder="نشانی پوش لحظه‌ای (اختیاری): wss://..." style="flex:1;min-width:240px">
+          <label class="hint"><input type="checkbox" id="src-fixture"> اجرای آزمایشی روی دادهٔ ساختگی محلی</label>
+          <button class="primary" onclick="probeSources()">سنجش مسیرهای داده</button>
+          <span class="busy" id="busy-src">در حال سنجش…</span>
+        </div>
+        <p class="hint">توجه: سامانه‌های ایرانی از بیرون کشور در دسترس نیستند؛ اگر اینجا «دسترس نیست» دیدید،
+        همان سنجش را روی رایانهٔ خودتان (داخل ایران) اجرا کنید. گزینهٔ «دادهٔ ساختگی محلی» فقط برای دیدن
+        شکل خروجی است و در گزارش هم صریح برچسب می‌خورد.</p>
+        <div class="cards" id="src-kpis"></div>
+        <table id="src-table" style="margin-top:8px">
+          <thead><tr><th>نقطهٔ پایانی</th><th>نتیجه</th><th>میلی‌ثانیه</th><th>میدان‌های یافته</th>
+          <th>تازگی (دو فراخوانی)</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <div id="src-ws-box" class="hint"></div>
+        <div class="row" style="margin-top:8px">
+          <button onclick="openFile('feasibility')">نمایش گزارش امکان‌سنجی</button>
+          <button onclick="makeVendorSheet()">ساخت برگهٔ نیاز داده برای فروشنده</button>
+          <button onclick="openFile('requirement-sheet')">نمایش برگهٔ نیاز داده</button>
+          <button onclick="openFile('data-strategy')">سند «چطور بسنجیم و چه بخریم»</button>
+        </div>
+        <div class="log" id="log-src">آماده.</div>
+      </div>
+
+      <div class="card">
+        <h4>پیش از خرید داده، این را بخوانید</h4>
+        <p class="hint">سه مسیر داده (سرویس رسمی پولی، سرویس‌های عمومی، پوش لحظه‌ای کارگزاری) با نیاز
+        واقعی همین ایستگاه سنجیده شده‌اند؛ از جمله اینکه وجه تضمین را هیچ سرویس داده‌ای نمی‌دهد.
+        نتیجه: امروز هیچ‌چیز نخرید؛ اول سابقهٔ ثبت‌شده بسازید.</p>
+        <div class="row">
+          <button onclick="openFile('data-routes')">نمایش سند «بررسی سه مسیر داده»</button>
+        </div>
+      </div>
+
+      <div class="card" id="card-conn">
+        <h4>دفتر اتصال — «هر وقت سرویس را گرفتم، همین‌جا وصلش کنم»</h4>
+        <p class="hint">یک پروفایل انتخاب کنید، کادرهای بالا خودشان پر می‌شوند، آزمایش کنید و ذخیره کنید.
+        از آن به بعد، هر بار که برنامه بالا بیاید همین اتصال خودکار فعال می‌شود.</p>
+        <div class="row">
+          <select id="conn-select" style="flex:1;min-width:280px" onchange="loadProfile()"></select>
+          <button class="primary" onclick="testProfile()">آزمایش اتصال این پروفایل</button>
+          <button onclick="saveProfile()">ذخیره و فعال کردن</button>
+          <button class="danger" onclick="deleteProfile()">پاک کردن پروفایل</button>
+        </div>
+        <div id="conn-info" class="warn" style="margin-top:8px">در حال خواندن دفتر اتصال‌ها…</div>
+        <div class="row" style="margin-top:6px">
+          <label><input type="checkbox" id="save-key"> کلید را روی این رایانه ذخیره کن (پیش‌فرض: ذخیره نمی‌شود، فقط در حافظه می‌ماند)</label>
+          <button onclick="saveKey()">ذخیرهٔ کلید این پروفایل</button>
+          <span class="hint" id="key-status"></span>
+        </div>
+        <details style="margin-top:8px">
+          <summary>یک اتصال تازه بسازم یا پروفایل فعلی را عوض کنم</summary>
+          <div class="grid2" style="margin-top:8px">
+            <div><label>نام کوتاه پروفایل (انگلیسی، بدون فاصله)</label><input type="text" id="conn-name" placeholder="my-broker-api"></div>
+            <div><label>عنوان خوانا</label><input type="text" id="conn-label" placeholder="سرویس دادهٔ کارگزاری خودم"></div>
+            <div><label>نام متغیر محیطی کلید (اختیاری)</label><input type="text" id="conn-env" placeholder="MARKET_API_KEY"></div>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <button onclick="saveAsNew()">ذخیره به‌عنوان پروفایل تازه</button>
+            <span class="hint">قالب نشانی، مسیر JSON و کلید از همان کادرهای بالای صفحه خوانده می‌شود.</span>
+          </div>
+        </details>
+      </div>
+
+      <div class="card" id="card-peek">
+        <h4>کاوش پاسخ سرویس — پیدا کردن «مسیر JSON» در یک دقیقه</h4>
+        <p class="hint">نشانی سرویس را بگذارید، دکمه را بزنید، و از فهرست عددهایی که پیدا می‌شود
+        روی «استفاده» بزنید تا مسیر درست خودش پر شود. دیگر لازم نیست ساختار پاسخ را حدس بزنید.</p>
+        <div class="row">
+          <input type="text" id="peek-url" placeholder="https://api.example.ir/quote?key={key}&l18={symbol}" style="flex:1;min-width:300px">
+          <button class="primary" onclick="peekService()">کاوش پاسخ سرویس</button>
+        </div>
+        <div id="peek-result" class="hint" style="margin-top:8px"></div>
+      </div>
+
+
+              <div class="card" style="margin-top:10px">
+          <h4>برگهٔ شاهد زنده — برای نشان‌دادن به سرمایه‌گذار یا کارفرما</h4>
+          <p class="hint">
+            نود ثانیه وقت می‌گیرد. عددها را <b>همین حالا</b> از سرویس فعال می‌خواند، نشانی و
+            <b>اثر انگشت پاسخ خام</b> و ساعت خواندن را چاپ می‌کند، و یک تصمیم نمونه با پاسخ،
+            مسیر محاسبه و پلهٔ خروج می‌سازد. جملهٔ محوری‌اش این است: «این عدد را من تایپ نکردم».
+          </p>
+          <button onclick="makeWitness()">ساخت برگهٔ شاهد زنده</button>
+          <button onclick="openFile('witness')">نمایش برگه</button>
+          <span class="busy" id="busy-witness">در حال خواندن از سرویس…</span>
+          <div class="log" id="witness-box">هنوز ساخته نشده است.</div>
+        </div>
+<div class="card" id="card-auto">
+        <h4>اتصال خودکار — «خودت بگرد ببین کدام منبع رایگان امروز کار می‌کند»</h4>
+        <p class="hint">من نمی‌توانم از جای خودم بررسی کنم که سرویس‌های ایرانی امروز چه پاسخی می‌دهند؛
+        ولی خودِ برنامه روی رایانهٔ شما می‌تواند. این دکمه چند منبع رایگان را یکی‌یکی امتحان می‌کند،
+        پاسخ را می‌خواند، عدد را عقلی می‌سنجد، و می‌گوید کدام کار کرد و چرا آن یکی کار نکرد.
+        هیچ کلیدی لازم نیست و هیچ هزینه‌ای ندارد.</p>
+        <div class="row">
+          <button class="primary" onclick="autoConnect(false)">بگرد و گزارش بده (ذخیره نکن)</button>
+          <button onclick="autoConnect(true)">بگرد، منبع سالم را ذخیره و فعال کن</button>
+          <span class="busy" id="busy-auto">در حال امتحان منابع…</span>
+        </div>
+        <div id="auto-result" class="hint" style="margin-top:8px"></div>
+      </div>
+
+      <div class="card" id="card-snap">
+        <h4>وارد کردن اعداد کارگزاری — اسنپ‌شات تاریخ‌دار</h4>
+        <p class="hint">این اعداد را از سامانهٔ کارگزاری خودتان بردارید و همین‌جا در جدول بنویسید؛
+        برنامه آن‌ها را با تاریخ امروز ذخیره می‌کند (<code>data/snapshots/snapshot-YYYY-MM-DD.json</code>).
+        پروندهٔ تاریخ‌دار یعنی سابقهٔ قابل ممیزی، و روز «واقعی» در کارنامه حساب می‌شود.
+        وجه تضمین را حتماً از سامانه بردارید؛ هیچ سرویسی این عدد را نمی‌دهد.</p>
+        <div class="row">
+          <button onclick="loadSnapRows()">خواندن اعداد فعلی</button>
+          <button onclick="addSnapRow()">افزودن ردیف</button>
+          <button class="primary" onclick="saveSnapForm()">ذخیرهٔ اسنپ‌شات امروز</button>
+          <span class="hint" id="snap-status">هنوز خوانده نشده است.</span>
+        </div>
+        <div style="overflow-x:auto"><table id="snap-table">
+          <thead><tr><th>نماد</th><th>راهبرد</th><th>قیمت پایه</th><th>آتی</th><th>اعمال</th>
+          <th>پرمیوم</th><th>روز</th><th>وجه تضمین هر قرارداد</th><th>نقدشوندگی روز</th>
+          <th>اسپرد</th><th>کد نماد</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+        <div class="row" style="margin-top:6px">
+          <button onclick="openFile('walkthrough')">راهنمای هر بخش (برای تازه‌کار)</button>
+          <button onclick="openFile('readme')">راهنمای کلی برنامه</button>
+          <button onclick="openFile('daily-inputs')">راهنما: هر روز چه عددی بگیرم؟ (مجانی)</button>
+          <button onclick="openFile('snapshot-template')">نمایش قالب پرونده</button>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <input type="text" id="snap-note" placeholder="یادداشت این روز (مثلاً: جلسه با کارگزاری)" style="flex:1;min-width:240px">
+          <label><input type="checkbox" id="snap-confirm"> این اعداد را خودم از سامانهٔ کارگزاری برداشتم</label>
+        </div>
+        <p class="hint">تا این تیک را نزنید، پرونده ذخیره نمی‌شود و روز «واقعی» حساب نمی‌شود.
+        این شرط عمدی است: کارنامه باید روی اعداد واقعی بایستد، نه روی دادهٔ تمرینی.</p>
+        <details class="hint" style="margin-top:10px">
+          <summary><b>راهنمای ستون‌به‌ستون — هر عدد را از کجا بیاورم؟ (برای تازه‌کارها)</b></summary>
+          <ul style="line-height:1.9">
+            <li><b>نماد:</b> نام نماد روی تابلوی کارگزاری (مثل «فولاد»). اگر سهم است، کد نماد لازم است؛
+                دکمهٔ «پیدا کردن کد نمادها» در کارت اتصال، آن را خودش پر می‌کند.</li>
+            <li><b>راهبرد:</b> نوع معاملهٔ خودتان؛ اگر نمی‌دانید، «کری» یا «پوشش‌داده‌شده» را بگذارید و
+                برنامه خودش می‌گوید محاسبه‌پذیر است یا نه.</li>
+            <li><b>قیمت پایه:</b> قیمت لحظه‌ای سهم یا دارایی در «مشاهدهٔ زنده» کارگزاری.</li>
+            <li><b>آتی:</b> قیمت قرارداد آتی همان دارایی (تابلوی آتی در کارگزاری).</li>
+            <li><b>اعمال:</b> قیمت اعمال اختیار (ستون «قیمت اعمال» در تابلوی اختیار معامله).</li>
+            <li><b>پرمیوم:</b> قیمت خودِ اختیار (ستون «آخرین قیمت» در تابلوی اختیار).</li>
+            <li><b>روز:</b> فاصلهٔ امروز تا سررسید، به روز (کارگزاری می‌نویسد).</li>
+            <li><b>وجه تضمین هر قرارداد:</b> فقط سامانهٔ کارگزاری دارد؛ این عدد مهم است و هیچ سایت
+                عمومی جای آن را نمی‌گیرد.</li>
+            <li><b>نقدشوندگی روز:</b> ستون «حجم» همان قرارداد در امروز.</li>
+            <li><b>اسپرد:</b> اختلاف قیمت خریدن و فروختن تقسیم بر میانگین؛ ۱٫۸٪ را بنویسید «1.8».</li>
+          </ul>
+        </details>
+        <div class="row" style="margin-top:8px">
+          <textarea id="snap-paste" rows="4" placeholder="متن را از سامانهٔ کارگزاری کپی کنید و همین‌جا بچسبانید. مثال هر خط:&#10;فولاد , covered_call , 7000 , 7600 , 400 , 45 , 7000 , 160 , 1.8&#10;اهرم , basis , ۲۰٬۰۰۰ , 22800 , 90" style="flex:1;min-width:320px;font-family:monospace"></textarea>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button class="primary" onclick="importPaste()">تشخیص خودکار و افزودن به جدول</button>
+          <label><input type="checkbox" id="paste-toman"> عددها به تومان است (×۱۰ می‌شود)</label>
+          <button onclick="el('snap-paste').value = ''; el('paste-report').textContent = ''">پاک کردن کادر</button>
+        </div>
+        <div class="log" id="paste-report">هنوز متنی نچسبانده‌اید.</div>
+        <div id="snap-problems" class="hint"></div>
+      </div>
+
+      <div class="card">
+        <h4>راهنمای خرید داده: چه بخرم و چرا</h4>
+        <table>
+          <thead><tr><th>گزینه</th><th>چه می‌دهد</th><th>هزینهٔ تقریبی (در سایت فروشنده تأیید کنید)</th><th>نحوهٔ اتصال</th><th>پس از اتصال چه تغییر می‌کند</th></tr></thead>
+          <tbody id="api-guide"></tbody>
+        </table>
+      </div>
+      <div class="log" id="log-data">آماده.</div>
+    </section>
+
+    <!-- ۳ -->
+    <section id="s-settings">
+      <h3>۳. تنظیمات ریاضی و ریسک</h3>
+      <p class="lead">این اعداد تصمیم را عوض می‌کنند. پیش‌فرض‌ها محافظه‌کارانه‌اند؛ هر عدد را بنا به شرایط خودتان عوض کنید و دوباره محاسبه بگیرید.</p>
+      <div class="grid2 card" id="rules-box"></div>
+      <div class="warn">نرخ سد را از کجا بیاورم؟ از «بازده مؤثر سالانه» صندوق درآمد ثابت همان روز.
+در شهریور ۱۴۰۵ این عدد حدود ۳۹ تا ۴۰ درصد بود. اگر نرخ سد اشتباه باشد، همهٔ سیگنال‌ها اشتباه می‌شوند.</div>
+      <div class="row"><button class="primary" onclick="saveRules()">ذخیرهٔ تنظیمات</button>
+        <button onclick="loadRules()">بازخوانی پیش‌فرض‌ها</button></div>
+      <div class="log" id="log-settings">آماده.</div>
+    </section>
+
+    <!-- ۴ -->
+    <section id="s-news">
+      <h3>۴. خبر و هشدار (اختیاری)</h3>
+      <p class="lead">خبر به‌تنهایی سیگنال نیست. کارکردش سه چیز است: زمینه، اولویت‌بندی، و ساختن «کار بازبینی»
+برای نمادهایی که خبر مهم دارند ولی در اسنپ‌شات شما نیستند.</p>
+      <div class="card">
+        <label><input type="checkbox" id="use-kodal" checked> از هشدارهای دیده‌بان کدال استفاده کن</label>
+        <div class="row" style="margin-top:6px">
+          <input type="text" id="kodal-db" style="flex:1;min-width:300px">
+          <button onclick="runKodalDemo()">اجرای دیده‌بان روی دادهٔ نمونه</button>
+          <button onclick="showAlerts()">نمایش هشدارهای فعلی</button>
+        </div>
+      </div>
+      <div class="log" id="log-news">آماده.</div>
+    </section>
+
+    <!-- ۵ -->
+    <section id="s-run">
+      <h3>۵. اجرا و محاسبه</h3>
+      <p class="lead">با یک دکمه: اسنپ‌شات خوانده می‌شود، موتور ریاضی هر ردیف را حساب می‌کند،
+دروازه‌های ریسک اعمال می‌شوند، و داشبورد تصمیم ساخته می‌شود.</p>
+      <div class="row"><button class="primary" onclick="doRun()">شروع محاسبه</button>
+        <button onclick="openFile('dashboard')">نمایش داشبورد</button>
+        <span class="busy" id="busy-run">در حال محاسبه…</span></div>
+      <div class="cards" id="run-kpis"></div>
+      <div class="log" id="log-run">آماده.</div>
+    </section>
+
+    <!-- ۶ -->
+    <section id="s-decide">
+      <h3>۶. <b style="color:#0b3d2e;font-size:19px">تصمیمِ خرید و فروش</b> — سیگنال‌های اوراق مشتقه امروز</h3>
+      <p class="lead">این‌جاست که نتیجهٔ اجرا را می‌بینید: <b>چه بخری، چه بفروشی، چقدر، و چرا</b>.
+هر سیگنال را ببینید، دلیل دروازه‌ها را بخوانید، و اگر پذیرفتید تأیید کنید (سفارش را خودتان در کارگزاری ثبت می‌کنید).
+تأیید شما در دفتر ثبت می‌شود و اجرای دوبارهٔ برنامه آن را بازنویسی نمی‌کند.</p>
+      <div class="card">
+        <div class="row">
+          <button onclick="loadSignals()">به‌روزرسانی فهرست</button>
+          <input type="text" id="decide-note" placeholder="یادداشت تصمیم (اختیاری)" style="flex:1;min-width:220px">
+          <button class="primary" onclick="decide('approved')">تأیید سیگنال انتخابی</button>
+          <button class="danger" onclick="decide('rejected')">رد با دلیل</button>
+        </div>
+      </div>
+      <table id="signals-table">
+        <thead><tr><th>شناسه</th><th>نماد</th><th>راهبرد</th><th class="num">بازده سالانه٪</th><th class="num">حاشیه</th>
+        <th>اندازه</th><th class="num">سرمایه (ریال)</th><th>وضعیت</th><th>دلیل دروازه / خبر</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="card" id="packet-card" style="display:none"><h4>بستهٔ سفارش (اجرا فقط توسط انسان در سامانهٔ کارگزاری)</h4>
+        <div class="log" id="packet"></div>
+        <div class="row"><button onclick="copyPacket()">کپی در حافظه</button></div></div>
+      <div class="card" id="card-judge">
+        <h4>داوری سیگنال ابزارهای دیگر — «سیگنال نرم‌افزار فعلی‌تان را بیاورید»</h4>
+        <p class="hint">دیده‌بان‌ها و ماشین‌حساب‌های بازار، سیگنال و قیمت تئوری می‌دهند؛ ولی نمی‌گویند آن
+        سیگنال با <b>کارمزد واقعی، اسپرد، نقدشوندگی و نرخ سد</b> می‌مانَد یا می‌افتد. عددهای سیگنال آن‌ها را
+        این‌جا بگذارید تا داوری، «نقطهٔ برگشت» و «فاصله تا مارجین‌کال» را بگیرید.</p>
+        <div class="row">
+          <select id="judge-kind" style="min-width:190px">
+            <option value="basis">خرید نقدی و فروش آتی (کری)</option>
+            <option value="covered">پوشش‌داده‌شده (کاورد کال)</option>
+            <option value="tabei">تبعی (تضمین فروش)</option>
+            <option value="box">باکس اسپرد</option>
+            <option value="parity">تساوی پوت‌کال</option>
+          </select>
+          <button onclick="judgePreset()">نمونهٔ آماده</button>
+          <span class="hint">عددهای ورودی (JSON):</span>
+        </div>
+        <div class="row">
+          <input type="text" id="judge-params" style="flex:1;min-width:320px"
+                 placeholder='{"spot":20000,"future":22800,"days":50,"spread_pct":0.005}'>
+        </div>
+        <div class="row">
+          <input type="text" id="judge-hurdle" placeholder="نرخ سد ٪ (پیش‌فرض ۳۹)" style="min-width:150px">
+          <input type="text" id="judge-claimed" placeholder="بازدهی که ابزار شما گفت (٪، اختیاری)" style="min-width:230px">
+          <input type="text" id="judge-margin" placeholder="وجه تضمین هر قرارداد" style="min-width:170px">
+          <input type="text" id="judge-contracts" placeholder="تعداد قرارداد" style="min-width:120px">
+          <input type="text" id="judge-price" placeholder="قیمت فعلی پایه" style="min-width:130px">
+          <button class="primary" onclick="judgeSignal(true)">داوری کن و برگه بساز</button>
+          <span class="busy" id="busy-judge">در حال داوری…</span>
+        </div>
+        <div class="cards" id="judge-kpis"></div>
+        <div class="row" style="margin-top:6px">
+          <button onclick="openFile('judge')">نمایش برگهٔ داوری</button>
+          <button onclick="openFile('judge-md')">نسخهٔ متنی برگه</button>
+          <button onclick="openFile('differentiation')">سند «تمایز و اعتماد»</button>
+        </div>
+        <div class="log" id="log-judge">آماده.</div>
+      </div>
+      <div class="log" id="log-decide">آماده.</div>
+    </section>
+
+    <!-- ۷ -->
+    <section id="s-backtest">
+      <h3>۷. پس‌آزمایی روی دادهٔ تاریخ <span style="font-size:11px;color:#6b7280;background:#f0f2f5;border:1px solid #e3e6ea;border-radius:10px;padding:1px 8px;font-weight:normal">برای اثباتِ برنامه — اختیاری</span></h3>
+      <p class="lead">همان موتوری که در تصمیم زنده کار می‌کند، روی دادهٔ گذشته اجرا می‌شود:
+نرخ برد، خطای مثبت کاذب، فرصت‌های از دست رفته، و خطای پیش‌بینی (انتظار منهای واقعیت) حساب می‌شود.</p>
+      <div class="card">
+        <div class="row">
+          <input type="text" id="hist-path" style="flex:1;min-width:300px">
+          <button onclick="makeHistTemplate()">ساخت قالب ستون‌ها</button>
+          <button class="primary" onclick="doBacktest()">اجرای پس‌آزمایی</button>
+          <button onclick="openFile('backtest')">نمایش گزارش</button>
+          <span class="busy" id="busy-bt">در حال اجرا…</span>
+        </div>
+        <p class="hint">ستون کلیدی پروندهٔ تاریخ: <code>realized_annualized_pct</code> یعنی «نتیجهٔ واقعی» آن معامله در گذشته.
+        این ستون در تصمیم هیچ نقشی ندارد و فقط برای سنجش است (آزمون ضد آینده‌نگری در تست‌ها اجرا می‌شود).</p>
+      </div>
+      <div class="cards" id="bt-kpis"></div>
+      <div class="log" id="log-bt">آماده.</div>
+    </section>
+
+    <!-- ۸ -->
+    <section id="s-bundle">
+      <h3>۸. بستهٔ تحویل شرکت <span style="font-size:11px;color:#6b7280;background:#f0f2f5;border:1px solid #e3e6ea;border-radius:10px;padding:1px 8px;font-weight:normal">برای اثباتِ برنامه — اختیاری</span></h3>
+      <p class="lead">این بسته همه‌چیز را برای راستی‌آزمایی شرکت در یک پوشه می‌گذارد:
+گزارش تصمیم‌ها، فهرست سیگنال‌ها، سند روش کار، بسته‌های سفارش، نتیجهٔ پس‌آزمایی،
+و چک‌لیستی که خودشان در پنج دقیقه راستی‌آزمایی کنند.</p>
+      <div class="row">
+        <button class="primary" onclick="doBundle()">ساخت بستهٔ راستی‌آزمایی</button>
+        <button onclick="openFile('method')">نمایش سند روش کار</button>
+        <input type="text" id="offer-client" placeholder="نام شرکت (روی پیشنهاد چاپ می‌شود)" style="min-width:200px">
+        <button onclick="buildOffer()">ساخت پیشنهاد یک‌صفحه‌ای</button>
+        <button onclick="openFile('offer')">نمایش پیشنهاد</button>
+        <input type="text" id="onboard-start" placeholder="روز شروع YYYY-MM-DD (خالی = امروز)" style="min-width:210px">
+        <button onclick="buildOnboarding()">ساخت برگهٔ روز اول مشتری</button>
+        <button onclick="openFile('onboarding')">نمایش برگهٔ روز اول</button>
+        <input type="text" id="review-on" placeholder="روز جلسهٔ بازبینی YYYY-MM-DD (خالی = امروز)" style="min-width:250px">
+        <button onclick="buildReviewMeeting()">ساخت برگهٔ جلسهٔ بازبینی</button>
+        <button onclick="openFile('review-meeting')">نمایش برگهٔ بازبینی</button>
+        <select id="outreach-kind" style="min-width:210px">
+          <option value="company">پیام برای شرکت (تولیدی، بازرگانی، طلا و ارز)</option>
+          <option value="brokerage">پیام برای کارگزاری / تأمین سرمایه</option>
+          <option value="teacher">پیام برای مدرس یا تحلیلگر بازار</option>
+          <option value="known">پیام برای آشنای بازار</option>
+        </select>
+        <button onclick="buildOutreach()">ساخت پیام‌های معرفی</button>
+        <button onclick="openFile('outreach')">نمایش پیام‌ها</button>
+      </div>
+      <div class="card">
+        <h4>تابلوی پیگیری مخاطبان — «پنج نام این هفته»</h4>
+        <p class="hint">فقط برای خودتان و روی همین رایانه: نام مخاطب، دسته، کانال، وضعیت. برنامه
+        خودش می‌گوید امروز چه کسی پیگیری لازم دارد (روز ۳ و روز ۱۰) و سه عدد هفته را می‌شمارد:
+        چند پیام، چند تماس، چند جلسه. شمارهٔ تلفن در این دفتر ذخیره نمی‌شود.</p>
+        <div class="row">
+          <input type="text" id="prospect-name" placeholder="نام مخاطب" style="min-width:180px">
+          <select id="prospect-kind" style="min-width:190px">
+            <option value="company">شرکت غیرمالی</option>
+            <option value="brokerage">کارگزاری / تأمین سرمایه</option>
+            <option value="teacher">مدرس یا تحلیلگر</option>
+            <option value="known">آشنای بازار</option>
+            <option value="university">دانشگاه / انجمن علمی</option>
+          </select>
+          <select id="prospect-channel" style="min-width:140px">
+            <option value="telegram">تلگرام</option>
+            <option value="whatsapp">واتساپ</option>
+            <option value="phone">تلفن</option>
+            <option value="inperson">حضوری</option>
+            <option value="linkedin">لینکدین</option>
+            <option value="email">ایمیل</option>
+          </select>
+          <button onclick="prospectAdd()">افزودن به تابلو</button>
+          <button onclick="prospectMark('sent')">پیام اول رفت</button>
+          <button onclick="prospectMark('followup')">پیگیری رفت</button>
+          <button onclick="prospectMark('reply')">جواب داد</button>
+          <button onclick="prospectMark('meeting')">جلسه گذاشته شد</button>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <input type="text" id="prospect-date" placeholder="تاریخ YYYY-MM-DD (خالی = امروز)" style="min-width:200px">
+          <select id="prospect-result" style="min-width:130px">
+            <option value="بله">نتیجه: بله</option>
+            <option value="نه">نتیجه: نه</option>
+            <option value="بعداً">نتیجه: بعداً</option>
+            <option value="بی‌جواب">نتیجه: بی‌جواب</option>
+          </select>
+          <button onclick="prospectOutcome()">ثبت نتیجهٔ جلسه</button>
+          <button onclick="prospectClose()">بستن پرونده</button>
+          <button onclick="prospectSheet()">ساخت برگهٔ تابلوی پیگیری</button>
+          <button onclick="openFile('prospects')">نمایش تابلو</button>
+        </div>
+        <div class="kpi" id="prospect-kpis">هنوز خوانده نشده است.</div>
+        <div class="log" id="log-prospects">آماده.</div>
+      </div>
+      <div class="card">
+        <h4>مراسم فروش امروز — بیست دقیقه</h4>
+        <p class="hint">تابلو را می‌خواند و کار امروز را با <b>متن آمادهٔ همان مخاطب</b> و لحن درستش
+        کنار هم می‌گذارد: کدام کار، در چه دقیقه‌ای. سقف پنج پیام در روز و بودجهٔ بیست دقیقه در خود
+        برنامه قفل است؛ هر کاری که جا نشد، با دلیلش به «فردا» می‌رود. اگر امروز نوبت کسی نباشد،
+        پیام تازه‌ای ساخته نمی‌شود.</p>
+        <div class="row">
+          <input type="text" id="ritual-sender" placeholder="نام شما در امضای پیام (مثلاً مسعود)" style="min-width:220px">
+          <input type="text" id="ritual-on" placeholder="تاریخ YYYY-MM-DD (خالی = امروز)" style="min-width:190px">
+          <button class="primary" onclick="buildSalesRitual()">مراسم فروش امروز</button>
+          <button onclick="openFile('sales-today')">نمایش برگهٔ امروز</button>
+        </div>
+        <div class="log" id="log-ritual">آماده.</div>
+        <span class="busy" id="busy-bundle">در حال ساخت…</span>
+      </div>
+      <div class="card"><h4>محتوای بسته</h4><div id="bundle-list" class="hint">هنوز ساخته نشده است.</div></div>
+      <div class="log" id="log-bundle">آماده.</div>
+    </section>
+
+
+    <!-- ۹ -->
+    <section id="s-trial">
+      <h3>۹. آزمون زنده و دفتر سرمایه‌گذار <span style="font-size:11px;color:#6b7280;background:#f0f2f5;border:1px solid #e3e6ea;border-radius:10px;padding:1px 8px;font-weight:normal">برای اثباتِ برنامه — اختیاری</span></h3>
+      <p class="lead">اینجا همان چیزی است که ارزش برنامه را ثابت می‌کند: نه وعدهٔ سود، بلکه <b>سابقهٔ ثبت‌شده</b>.
+هر سیگنالی که برنامه می‌سازد، با ساعت دقیق و همهٔ ورودی‌های ریاضی در دفتر می‌نشیند.
+بعداً با خواندن قیمت‌های تازه، دفتر می‌گوید همان فرصت امروز بازتر شد، بسته شد، یا زیر کف رفت.
+هر ثبت یک هش زنجیره‌ای دارد؛ اگر کسی ردیفی را عوض کند، زنجیره می‌شکند و گزارش همان را نشان می‌دهد.</p>
+
+      <div class="card" id="card-daily">
+        <h4>۰. مراسم امروز — یک دکمه، تمام کارهای امروز</h4>
+        <p class="hint">این دکمه همان کاری را می‌کند که هر روز کاری باید بشود: قیمت تازه می‌خواند،
+        محاسبه می‌کند، سیگنال‌های امروز را ثبت می‌کند، ردیف‌های قبلی را بازسنجی می‌کند، زنجیره را
+        بررسی می‌کند، گزارش می‌سازد، و کارنامه را به‌روز می‌کند. هیچ سفارشی ارسال نمی‌شود.</p>
+        <div class="row">
+          <input type="text" id="daily-note" placeholder="یادداشت امروز (اختیاری)" style="flex:1;min-width:220px">
+          <button class="primary" onclick="runDaily()">اجرای مراسم امروز</button>
+          <button onclick="runDaily(true)">اجرای مراسم با حاشیهٔ محافظه‌کارانه</button>
+          <span class="busy" id="busy-daily">در حال اجرا…</span>
+        </div>
+      </div>
+
+      <div class="card" id="card-score">
+        <h4>کارنامهٔ آزمون: آیا وقت خرید دادهٔ زنده و رفتن به جلسهٔ شرکت رسیده؟</h4>
+        <div class="cards" id="score-kpis"></div>
+        <div id="score-verdict" class="warn">هنوز مراسمی اجرا نشده است.</div>
+        <table id="score-table">
+          <thead><tr><th></th><th>شرط</th><th>وضعیت</th><th>لازم</th><th>راهنمای عمل</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <details><summary>تاریخ اجراهای قبلی</summary><div id="runs-list" class="hint">—</div></details>
+      </div>
+
+      <div class="card">
+        <h4>۱. ثبت سیگنال‌های امروز در دفتر</h4>
+        <div class="row">
+          <input type="text" id="trial-note" placeholder="یادداشت (اختیاری): مثلاً جلسهٔ اول با سرمایه‌گذار" style="flex:1;min-width:240px">
+          <button class="primary" onclick="recordTrial()">ثبت سیگنال‌های گام ۵</button>
+          <button onclick="recordTrial(true)">ثبت با حاشیهٔ محافظه‌کارانه (منهای ۲ واحد)</button>
+        </div>
+        <p class="hint">«ثبت با حاشیهٔ محافظه‌کارانه» انتظار را دو واحد درصد پایین‌تر می‌نویسد تا فرض‌ها
+        واقع‌بینانه‌تر شود؛ این کار سابقهٔ شما را برای شرکت معتبرتر می‌کند، نه ضعیف‌تر.</p>
+      </div>
+
+      <div class="card">
+        <h4>۲. بازسنجی با قیمت‌های تازه</h4>
+        <div class="row">
+          <button class="primary" onclick="markTrial()">خواندن قیمت‌های تازه و بازسنجی دفتر</button>
+          <button onclick="loadTrial()">به‌روزرسانی جدول</button>
+          <span class="busy" id="busy-trial">در حال خواندن…</span>
+        </div>
+        <p class="hint">این دکمه همان موتور گام ۵ را روی قیمت‌های امروز اجرا می‌کند و تفاوت را در دفتر می‌نویسد.
+        برای این کار منبع داده باید فعال باشد (خوراک آزمایشی محلی هم کافی است).</p>
+      </div>
+
+      <div class="cards" id="trial-kpis"></div>
+
+      <div class="card">
+        <h4>۳. دفتر ثبت‌ها</h4>
+        <div class="row" style="margin-bottom:6px">
+          <button onclick="verifyChain()">بررسی زنجیرهٔ هش</button>
+          <button class="primary" onclick="makeTrialReport()">ساخت گزارش سرمایه‌گذار (HTML + CSV)</button>
+          <button onclick="openFile('trial')">نمایش گزارش</button>
+        </div>
+        <div id="chain-status" class="hint"></div>
+        <table id="trial-table" style="margin-top:8px">
+          <thead><tr><th>#</th><th>زمان ثبت</th><th>نماد</th><th>راهبرد</th><th>تصمیم</th>
+          <th class="num">انتظار در ثبت</th><th class="num">انتظار امروز</th><th class="num">تغییر</th>
+          <th>وضعیت</th><th>منبع داده</th><th>هش</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="card" id="card-exam">
+        <h4>۴. آزمون ۱۰ دقیقه‌ای: بگذارید خودش امتحانش کند</h4>
+        <p class="hint">پانزده مورد، هر کدام <b>دو بار</b> حساب می‌شود: یک بار با موتور واقعی برنامه، یک بار
+        با «حساب دستی» که همان‌جا در کد نوشته شده و با ماشین‌حساب قابل چک است. برگهٔ آزمون را به سرمایه‌گذار
+        بدهید تا اول حدس خودش را بنویسد، بعد پاسخ و راه چک را ببیند. هیچ عددی از قبل «درست» فرض نشده است.</p>
+        <div class="row">
+          <button class="primary" onclick="runSelftest()">اجرای آزمون ۱۰ دقیقه‌ای</button>
+          <button onclick="openFile('selftest')">نمایش کارنامهٔ آزمون</button>
+          <button onclick="openFile('exam')">برگهٔ آزمون چاپی</button>
+          <span class="busy" id="busy-exam">در حال اجرا…</span>
+        </div>
+        <div class="cards" id="exam-kpis"></div>
+        <table id="exam-table" style="margin-top:8px">
+          <thead><tr><th>مورد</th><th>چه چیزی را ثابت می‌کند</th><th>خروجی برنامه در برابر حساب مستقل</th>
+          <th>وضعیت</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="card" id="card-dossier">
+        <h4>۵. پروندهٔ سرمایه‌گذار: یک فایل برای جلسه</h4>
+        <p class="hint">قواعد قفل‌شده، نتیجهٔ آزمون، دفتر و کارنامه، پس‌آزمایی، وضعیت اتصال، آنچه ادعا
+        نمی‌کنیم، و اثر انگشت (sha256) پرونده‌ها را در یک صفحهٔ آمادهٔ چاپ می‌ریزد؛ همین را به شرکت بدهید.
+        هیچ داده‌ای بیرون نمی‌رود و هیچ سودی وعده داده نمی‌شود.</p>
+        <div class="row">
+          <button class="primary" onclick="buildDossier()">ساخت پروندهٔ سرمایه‌گذار</button>
+          <button onclick="openFile('dossier')">نمایش پرونده</button>
+          <button onclick="openFile('dossier-md')">نسخهٔ متنی برای ایمیل</button>
+          <span class="busy" id="busy-dossier">در حال ساخت…</span>
+        </div>
+        <div id="dossier-info" class="hint">هنوز ساخته نشده است.</div>
+      </div>
+
+      <div class="card">
+        <h4>۶. برنامهٔ ۱۵ دقیقه‌ای جلوی سرمایه‌گذار</h4>
+        <p class="hint">راهنمای کامل و متن گفتگو در پروندهٔ <code>DEMO-INVESTOR-FA.md</code> است (دکمهٔ زیر بازش می‌کند).
+        خلاصه‌اش این است:</p>
+        <p class="hint">برای دورهٔ دو هفته‌ای، هر روز کاری فقط دکمهٔ «اجرای مراسم امروز» را بزنید؛
+        بقیه‌اش خودکار است. روی ویندوز می‌توانید با <code>schedule-daily-trial.bat</code> بگذارید
+        هر روز خودش اجرا شود و شما فقط کارنامه را ببینید.</p>
+        <ol class="hint" style="padding-inline-start:20px">
+          <li><b>گام ۲</b>: پروفایل «خوراک آزمایشی محلی» را آزمایش کنید — نشان دهید قیمت زنده می‌آید و نوار تازگی سبز می‌شود، بدون هیچ هزینه.</li>
+          <li><b>گام ۵</b>: محاسبه بگیرید — سیگنال‌ها با عدد و دلیل دروازه روی میز می‌آیند.</li>
+          <li><b>خودش امتحان کند</b>: بگویید «کارمزد را از ۰٫۴۶٪ به ۲٪ تغییر بده» — ببینید سیگنال‌ها یکی‌یکی محو می‌شوند. این لحظهٔ اعتماد است.</li>
+          <li><b>گام ۷</b>: پس‌آزمایی روی تاریخ — خطای پیش‌بینی منفی را هم نشان دهید؛ صداقت عدد، بهترین تبلیغ است.</li>
+          <li><b>گام ۹</b>: دفتر را ثبت کنید و همان‌جا زنجیرهٔ هش را بررسی کنید؛ قرار بگذارید دو هفته بعد بازسنجی شود.</li>
+          <li><b>آزمون</b>: دکمهٔ «اجرای آزمون ۱۰ دقیقه‌ای» را بزنید و بگذارید خودش دو مورد را با ماشین‌حساب چک کند.</li>
+          <li><b>پرونده</b>: پروندهٔ سرمایه‌گذار را بسازید و همان فایل را به شرکت بدهید.</li>
+        </ol>
+        <div class="row">
+          <button onclick="openDemoDoc()">نمایش راهنمای دموی سرمایه‌گذار</button>
+          <button onclick="openFile('walkthrough')">راهنمای هر بخش، برای تازه‌کار (گام‌به‌گام)</button>
+        </div>
+      </div>
+      <div class="log" id="log-trial">آماده.</div>
+    </section>
+
+    <section id="s-blind">
+      <h3>۱۰. آزمون کور سرمایه‌گذار — «خودش بپرسد، خودش حساب کند، خودش باور کند» <span style="font-size:11px;color:#6b7280;background:#f0f2f5;border:1px solid #e3e6ea;border-radius:10px;padding:1px 8px;font-weight:normal">برای اثباتِ برنامه — اختیاری</span></h3>
+      <p class="lead">بهترین راه متقاعدکردن سرمایه‌گذار باسواد این نیست که سود نشانش بدهیم؛ این است که
+      خودش یک عدد را روی کاغذ حساب کند و ببیند برنامه همان را می‌گوید. این گام سه کار می‌کند:
+      شش پرسش کور می‌پرسد و پاسخ‌ها را پنهان نگه می‌دارد، آستانهٔ ریزش راهبردها را نشان می‌دهد،
+      و یک معاملهٔ واقعی گذشته را با کارمزدهای ایران حساب می‌کند. هیچ‌کدام از این عددها وعدهٔ سود نیست؛
+      حساب است.</p>
+      <div class="card" id="card-blind">
+        <h4>۱. شش پرسش کور: اول شما حدس بزنید، بعد برنامه پاسخ می‌دهد</h4>
+        <p class="hint">ابتدا فقط پرسش‌ها می‌آید. عدد یا «بله/خیر» خودتان را بنویسید، بعد دکمهٔ داوری را بزنید تا
+        پاسخ برنامه با فرمول و روش دوم (برای بازبینی با ماشین‌حساب) رو شود.</p>
+        <div class="row">
+          <button class="primary" onclick="loadCases()">نمایش پرسش‌ها</button>
+          <button onclick="checkGuesses()">داوری حدس‌های من</button>
+          <span class="busy" id="busy-blind">در حال کار…</span>
+        </div>
+        <div id="blind-list" class="hint">هنوز پرسشی نمایش داده نشده است.</div>
+      </div>
+      <div class="card">
+        <h4>۲. آستانهٔ ریزش: با هر نرخ سد شما، کدام راهبرد می‌ماند و کدام می‌افتد</h4>
+        <p class="hint">نرخ سد را در گام ۳ می‌گذارید. این جدول همان را روی همهٔ راهبردها اعمال می‌کند تا
+        ببینید کدام راهبرد به تصمیم شما حساس است.</p>
+        <div class="row"><button onclick="loadLadder()">محاسبهٔ جدول</button></div>
+        <div id="ladder-box" class="hint">هنوز محاسبه نشده است.</div>
+      </div>
+      <div class="card">
+        <h4>۳. حساب‌رسی واقعیت: یک معاملهٔ گذشته با عدد کارگزاری</h4>
+        <p class="hint">این کار به اینترنت نیاز ندارد. اگر سرمایه‌گذار بگوید «من فلان روز فلان سهم را
+        خریدم و فلان‌روز فروختم»، عددها را اینجا بگذارید تا کارمزد و مالیات کم شود و نتیجهٔ واقعی درآید.</p>
+        <div class="row">
+          <input type="text" id="rec-symbol" placeholder="نماد، مثل فولاد" style="min-width:130px">
+          <input type="text" id="rec-entry" placeholder="قیمت خرید" style="min-width:110px">
+          <input type="text" id="rec-exit" placeholder="قیمت فروش" style="min-width:110px">
+          <input type="text" id="rec-days" placeholder="روز نگه‌داری" value="30" style="min-width:100px">
+          <input type="text" id="rec-units" placeholder="تعداد" value="1" style="min-width:80px">
+          <input type="text" id="rec-expected" placeholder="انتظار برنامه (٪، اختیاری)" style="min-width:150px">
+          <button class="primary" onclick="doReconcile()">حساب کن</button>
+          <span class="busy" id="busy-rec">در حال حساب…</span>
+        </div>
+        <div class="log" id="log-rec">آماده.</div>
+      </div>
+      <div class="card">
+        <h4>۴. برگهٔ چاپی و زنجیرهٔ هش</h4>
+        <p class="hint">این برگه چکیدهٔ همین جلسه است: حدس‌های سرمایه‌گذار، پاسخ‌های برنامه، جدول آستانهٔ
+        ریزش و حساب‌رسی‌ها، با جای امضا. کلید زنجیره در پایین برگه می‌آید؛ اگر عددی بعداً عوض شود،
+        کلید می‌شکند.</p>
+        <div class="row">
+          <input type="text" id="blind-client" placeholder="نام سرمایه‌گذار (روی برگه و پیمان‌نامه)"
+                 style="min-width:240px">
+          <button class="primary" onclick="buildBlindSheet()">ساخت برگهٔ آزمون</button>
+          <button onclick="openFile('blind-sheet')">نمایش برگه</button>
+          <button onclick="openFile('blind-md')">نسخهٔ متنی (برای ایمیل)</button>
+          <button onclick="verifyBlindChain()">بررسی زنجیرهٔ هش</button>
+          <button onclick="openFile('blind-sample')">نمونهٔ پرشده (برای دیدن شکل برگه)</button>
+          <button onclick="openFile('zero-cost')">سند «چرا هیچ‌چیز نمی‌خریم»</button>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button class="primary" onclick="makePledge()">ساخت پیمان‌نامهٔ نمایش (دواِمضا)</button>
+          <button onclick="openFile('pledge')">نمایش پیمان‌نامه</button>
+          <button onclick="loadLadder()">ساخت سند «چه بخرم / کِی بفروشم / کِی می‌افتد»</button>
+          <button onclick="openFile('ladder')">نمایش سند پلهٔ تصمیم</button>
+        </div>
+        <div class="log" id="log-blind">آماده.</div>
+      </div>
+    </section>
+
+    <section id="s-math">
+      <h3>۱۱. راهبردها، شوک‌آزمون و ریاضیِ پول — «ایده‌های پول‌ساز، با عدد و با مرزِ افتادن» <span style="font-size:11px;color:#6b7280;background:#f0f2f5;border:1px solid #e3e6ea;border-radius:10px;padding:1px 8px;font-weight:normal">برای اثباتِ برنامه — اختیاری</span></h3>
+      <p class="lead">این گام سه سند می‌سازد. هیچ‌کدام وعدهٔ سود نیست: یکی می‌گوید هر راهبرد چه وقت
+      به‌کار می‌آید و <b>کِی باید ببندی</b>، یکی راهبردها را زیر شرایط بد می‌گذارد تا ببینی کجا می‌افتند،
+      و یکی ریاضیِ بقا را می‌گوید (اندازهٔ درست هر معامله، احتمال نیم‌شدن حساب، و چند وقت تا هدف).</p>
+      <div class="card" id="card-strategies">
+        <h4>۱. جزوهٔ راهبردها: درصدِ هر راهبرد، با روشِ عدد و قاعدهٔ بستن</h4>
+        <p class="hint">هر عدد یک برچسب روش دارد: «قطعی» (در لحظهٔ ورود قفل می‌شود، مثل تبعی و باکس)،
+        «مدل‌محور» (با نوسان ضمنی خودِ قیمت بازار حساب می‌شود)، و «نقل‌شده» (از منبع، با نام منبع).
+        هر عدد با دو روش حساب می‌شود: موتور ایستگاه + محاسبهٔ دستی دوم؛ اگر نخوانند، همان‌جا علامت مخالف می‌خورد.</p>
+        <div class="row">
+          <button class="primary" onclick="buildStrategies()">ساخت جزوه + شوک‌آزمون</button>
+          <button onclick="openFile('strategies')">نمایش جزوه (چاپی)</button>
+          <button onclick="openFile('strategies-md')">نسخهٔ متنی جزوه</button>
+          <button onclick="openFile('strategies-refs')">منابع و محدودیت‌ها</button>
+          <span class="busy" id="busy-strategies">در حال ساخت…</span>
+        </div>
+        <div id="strategy-table" class="hint">هنوز ساخته نشده است.</div>
+      </div>
+      <div class="card">
+        <h4>۲. شوک‌آزمون: «مطمئن شو ایده‌های قبلی واقعاً جواب می‌دهند»</h4>
+        <p class="hint">هر راهبرد با پنج بدترشدن دوباره حساب می‌شود: لغزش اجرا ۰٫۵٪، حرکت مخالف قیمت،
+        کارمزد دو و سه برابر، و نرخ سد ۴۵٪. سه دسته می‌آید: <b>سخت‌جان</b>، <b>لرزان</b>، و
+        <b>لبِ مرز</b> (رد کرد ولی حاشیه‌اش کمتر از ۵ واحد درصد شد). «نرخ تاب‌آوری» احتمال سود نیست.</p>
+        <div class="row">
+          <button class="primary" onclick="buildStress()">حساب کن</button>
+          <button onclick="openFile('stress')">نمایش برگهٔ شوک‌آزمون</button>
+          <button onclick="openFile('stress-md')">نسخهٔ متنی</button>
+        </div>
+        <div id="stress-table" class="hint">هنوز حساب نشده است.</div>
+      </div>
+      <div class="card">
+        <h4>۳. ریاضیِ پول: اندازهٔ درست، احتمال ورشکستگی، و زمان تا هدف</h4>
+        <p class="hint">سرمایهٔ کوچک با اندازهٔ درشت می‌میرد و با اندازهٔ درست عمر می‌کند. این کارت
+        کسر کِلی (و نسخهٔ نصف‌کِلی محافظه‌کارانه) را حساب می‌کند، هزاران مسیر ممکن را شبیه‌سازی می‌کند
+        و می‌گوید با این مزیت و این کارمزد، رسیدن به هدف چند ماه/سال طول می‌کشد — و کجا احتمال نیم‌شدن حساب هست.</p>
+        <div class="row">
+          <input type="text" id="bk-capital" placeholder="سرمایه (ریال)" value="100000000" style="min-width:150px">
+          <input type="text" id="bk-target" placeholder="هدف (ریال)" value="400000000" style="min-width:150px">
+          <input type="text" id="bk-winprob" placeholder="نرخ برد (۰٫۵۵)" value="0.55" style="min-width:120px">
+          <input type="text" id="bk-win" placeholder="سود برد (٪)" value="8" style="min-width:110px">
+          <input type="text" id="bk-loss" placeholder="زیان باخت (٪)" value="5" style="min-width:110px">
+          <input type="text" id="bk-strategy" placeholder="بازده راهبرد (٪ سالانه)" value="68.482" style="min-width:170px">
+          <input type="text" id="bk-churn" placeholder="چرخش در سال" value="1" style="min-width:110px">
+          <button class="primary" onclick="buildBankroll()">محاسبه کن</button>
+          <button onclick="openFile('bankroll')">نمایش برگه</button>
+          <button onclick="openFile('bankroll-md')">نسخهٔ متنی</button>
+          <span class="busy" id="busy-bankroll">در حال حساب…</span>
+        </div>
+        <div id="bankroll-box" class="hint">هنوز حساب نشده است.</div>
+      </div>
+      <div class="card">
+        <h4>۴. چرا این‌ها «وعدهٔ پول» نیستند (و چطور با این حال پول درمی‌آید)</h4>
+        <p class="hint">سه چیز در این گام قفل شده است: کارمزد واقعی از هر معامله کسر می‌شود، عددها با
+        دو روش حساب می‌شوند، و راهبردِ بی‌مزیت با پرچم «نمی‌ارزد» بیرون می‌آید. پول درآوردن از این‌جا
+        می‌آید: <b>کارهای بی‌مزیت را رد کن</b>، کارهای قفل‌شده (تبعی/مبنا) را با اندازهٔ درست بگیر،
+        و دفتر شاهد بساز تا دیگری هم بتواند راستی‌آزمایی کند. اگر سرمایه‌گذار بپرسد «درصد سودت چقدر
+        است؟»، جواب درست این است: «سود را وعده نمی‌دهم؛ این‌جا نشان می‌دهم چه چیزی ریاضی می‌ماند و چه
+        چیزی می‌افتد — و همه را با ماشین‌حساب خودتان بازتولید می‌کنید.»</p>
+      </div>
+    </section>
+
+    <div class="steps-actions">
+      <button onclick="go(-1)">◀ گام قبل</button>
+      <button class="primary" onclick="go(1)">گام بعد ▶</button>
+    </div>
+  </main>
+</div>
+
+<footer style="max-width:1100px;margin:0 auto;padding:14px 20px 30px;color:#6b7280;font-size:12.5px;
+        border-top:1px solid #e3e6ea;text-align:center">
+  <b>دولوپر: مهندس مسعود مجربیان</b> · همراه: <a href="tel:+989126630554">09126630554</a> ·
+  Telegram: <a href="https://t.me/Mojarabian" target="_blank" rel="noopener">Mojarabian</a> ·
+  Instagram: <a href="https://instagram.com/Mojarabian.Art" target="_blank" rel="noopener">Mojarabian.Art</a>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

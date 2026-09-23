@@ -1,0 +1,22 @@
+{
+  "watchlist": ["خساپا", "شپنا", "فولاد", "وبملت", "شستا", "اهرم", "طلا", "زعفران"],
+  "sources": [
+    {"type": "codal", "name": "کدال", "url": "https://search.codal.ir/api/search/v2/q"},
+    {"type": "rss", "name": "فارس", "url": "https://www.farsnews.ir/rss"}
+  ],
+  "proxies": {"http": "", "https": ""},
+  "timeout_seconds": 15,
+  "retries": 2,
+  "min_score_to_alert": 45,
+  "db_path": "",
+  "report_path": "",
+  "llm": {"provider": "none", "model": "", "base_url": "", "api_key_env": "TYPESAFE_API_KEY"},
+  "notifiers": {
+    "console": true,
+    "file": true,
+    "telegram": {"enabled": false, "token_env": "TELEGRAM_BOT_TOKEN", "chat_id": ""},
+    "bale": {"enabled": false, "token_env": "BALE_BOT_TOKEN", "chat_id": ""}
+  },
+  "credit": "تهیه‌کننده: Masoud Mojarabian · https://www.instagram.com/Mojarabian.Art/ · tel:+989126630554 · https://t.me/Mojarabian",
+  "report_title": "دیده‌بان کدال و خبر بازار"
+}

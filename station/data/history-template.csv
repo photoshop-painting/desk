@@ -1,0 +1,2 @@
+date,symbol,kind,spot,future,strike,premium,put_price,stock_price,days,margin_per_contract,liquidity_contracts_per_day,spread_pct,hurdle,realized_annualized_pct
+1405-05-01,اهرم,basis,20000,22800,,,,,90,20000000,900,0.005,0.39,61.0

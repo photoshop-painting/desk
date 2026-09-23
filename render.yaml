@@ -1,0 +1,25 @@
+# میزبان مجانی جایگزین (Render) — کارآمد، ولی ضعیف‌تر از Hugging Face.
+# ۵۱۲ مگ رم و ۰٫۱ پردازنده · بعد از ۱۵ دقیقه بی‌کاری می‌خوابد (بیدار شدن ۳۰ تا ۶۰ ثانیه) ·
+# دیسک ماندگار ندارد (داده با هر بازسازی پاک می‌شود) · کارت بانکی نمی‌خواهد.
+#
+# راه: کد را روی یک مخزن GitHub بگذار (همان بستهٔ iran-desk-hf) و در Render گزینهٔ
+# «New → Blueprint» را بزن و همین پرونده را انتخاب کن. بعد رمزها را در Environment بگذار.
+services:
+  - type: web
+    name: iran-desk-station
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /login
+    autoDeploy: false
+    envVars:
+      - key: STATION_ADMIN_ID
+        value: mafhoom
+      - key: STATION_ADMIN_PASS
+        sync: false          # در داشبورد خودت پرش کن؛ در مخزن نوشته نمی‌شود
+      - key: STATION_GUEST_ID
+        value: masoud
+      - key: STATION_GUEST_PASS
+        sync: false
+      - key: STATION_GUEST_OFF
+        value: "0"

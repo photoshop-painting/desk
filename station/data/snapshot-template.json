@@ -1,0 +1,109 @@
+{
+  "note": "این یک قالب است، نه دادهٔ واقعی. عددهای هر ردیف را با عدد امروزِ سامانهٔ کارگزاری خودتان عوض کنید و پرونده را با نام خودتان ذخیره کنید (مثلاً daily-input.json).",
+  "_units": "hurdle و spread_pct کسری‌اند (0.39 یعنی ۳۹٪ و 0.005 یعنی ۰.۵٪) · capital به ریال · days = روزهای مانده تا سررسید · prices به ریال · margin_per_contract = وجه تضمین هر قرارداد (سهم در این قالب: ارزش یک سهم) · liquidity_contracts_per_day = حجم قرارداد روز",
+  "_fields_per_kind": {
+    "basis": [
+      "spot",
+      "future",
+      "days"
+    ],
+    "covered_call": [
+      "spot",
+      "strike",
+      "premium",
+      "days"
+    ],
+    "tabei": [
+      "stock_price",
+      "put_price",
+      "strike",
+      "days"
+    ],
+    "box": [
+      "call_low",
+      "put_low",
+      "call_high",
+      "put_high",
+      "strike_low",
+      "strike_high",
+      "days"
+    ],
+    "parity": [
+      "call",
+      "put",
+      "spot",
+      "strike",
+      "days"
+    ]
+  },
+  "as_of": "تاریخ امروز",
+  "hurdle": 0.39,
+  "capital": 20000000000,
+  "rows": [
+    {
+      "symbol": "اهرم",
+      "kind": "basis",
+      "spot": 20000,
+      "future": 22800,
+      "days": 90,
+      "storage_annual": 0.0,
+      "margin_per_contract": 20000000,
+      "unit": "قرارداد",
+      "liquidity_contracts_per_day": 900,
+      "spread_pct": 0.005
+    },
+    {
+      "symbol": "فولاد",
+      "kind": "covered_call",
+      "spot": 7000,
+      "strike": 7600,
+      "premium": 400,
+      "days": 45,
+      "margin_per_contract": 7000,
+      "unit": "سهم",
+      "liquidity_contracts_per_day": 160,
+      "spread_pct": 0.018
+    },
+    {
+      "symbol": "کگل",
+      "kind": "tabei",
+      "stock_price": 9800,
+      "put_price": 40,
+      "strike": 14210,
+      "days": 365,
+      "margin_per_contract": 9840,
+      "unit": "سهم",
+      "liquidity_contracts_per_day": 240,
+      "spread_pct": 0.02
+    },
+    {
+      "symbol": "شپنا",
+      "kind": "box",
+      "call_low": 300,
+      "put_low": 430,
+      "call_high": 175,
+      "put_high": 585,
+      "strike_low": 1200,
+      "strike_high": 1500,
+      "days": 45,
+      "margin_per_contract": 250000,
+      "unit": "قرارداد",
+      "liquidity_contracts_per_day": 12,
+      "spread_pct": 0.045
+    },
+    {
+      "symbol": "وبملت",
+      "kind": "parity",
+      "call": 420,
+      "put": 380,
+      "spot": 9000,
+      "strike": 9000,
+      "days": 30,
+      "rate": 0.39,
+      "margin_per_contract": 9000,
+      "unit": "سهم",
+      "liquidity_contracts_per_day": 80,
+      "spread_pct": 0.02
+    }
+  ]
+}
