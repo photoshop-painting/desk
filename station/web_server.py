@@ -787,6 +787,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._serve_file(WEB / "index.html")
         if u.path == "/app.js":
             return self._serve_file(WEB / "app.js")
+        if u.path == "/help.js":
+            return self._serve_file(WEB / "help.js")
         if u.path in ("/admin", "/admin.html"):
             return self._serve_file(WEB / "admin.html")
         if u.path == "/admin.js":
