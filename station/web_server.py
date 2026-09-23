@@ -55,6 +55,7 @@ import investor_test as invtest  # noqa: E402
 import signal_judge as judger  # noqa: E402
 import license as licmod  # noqa: A004
 import diagnose as diagmod  # noqa: E402
+import audit  # noqa: E402
 import snapshot_import as snapimp  # noqa: E402
 import adminauth as admauth  # noqa: E402
 import usage_meter as usagemod  # noqa: E402
@@ -563,24 +564,89 @@ class Handler(BaseHTTPRequestHandler):
         return proto == "https"
 
     def _guard(self, method: str, run) -> None:
-        """هر خطای پیش‌بینی‌نشده را به پاسخ ۵۰۰ خوانا تبدیل می‌کند.
+        """هر خطای پیش‌بینی‌نشده را به پاسخ ۵۰۰ خوانا تبدیل می‌کند + لاگِ ممیزی می‌نویسد.
 
         چرا: پیش‌تر اگر وسط یک درخواست خطایی رخ می‌داد، کارساز بدون پاسخ اتصال را می‌بست و
         کلاینت فقط «اتصال قطع شد» می‌دید (روی میزبان ابری همین اتفاق افتاد و ریشه‌یابی را سخت
-        کرد). حالا هم پیام روشن برمی‌گردد، هم ردِ خطا در گزارش می‌ماند.
+        کرد). حالا هم پیام روشن برمی‌گردد، هم ردِ خطا در گزارش می‌ماند، هم کارِ هر کاربر
+        در لاگِ ممیزی (پنل مدیریت ← لاگ‌ها) ثبت می‌شود تا هم «چه کار کرد» معلوم باشد و هم
+        «باگ دقیقاً چی بوده».
         """
+        t0 = time.monotonic()
+        u = urlparse(self.path)
+        path = u.path
+        # چه کسی: از نشستِ دروازه (اگر هست)
+        role = self._role()
+        uid = self._role_id() if role else "—"
+        self._audit_status = 0
+        err = None
         try:
             run()
         except (BrokenPipeError, ConnectionResetError):
             pass                                   # کلاینت خودش رفت؛ کاری لازم نیست
         except Exception as e:                     # noqa: BLE001 — نگهبانِ آخر
-            tb = traceback.format_exc(limit=6)
-            print(f"[{method}] خطای پیش‌بینی‌نشده: {e}\n{tb}", flush=True)
+            err = traceback.format_exc(limit=8)
+            print(f"[{method}] خطای پیش‌بینی‌نشده: {e}\n{err}", flush=True)
             try:
                 self._json({"error": f"خطای داخلی برنامه: {type(e).__name__} — {str(e)[:200]}",
                             "path": self.path, "kind": "internal_error"}, 500)
             except Exception:
                 pass
+        finally:
+            self._audit_log(method, path, role, uid, int((time.monotonic() - t0) * 1000), err)
+
+    # نامِ فارسیِ کارِ رایجِ هر مسیر — در لاگِ ممیزی به‌جای «POST /api/run»
+    ACTION_LABELS = {
+        "/": "باز شدن برنامه",
+        "/admin": "باز شدن پنل مدیریت",
+        "/login": "باز شدن صفحهٔ ورود",
+        "/guide": "باز شدن راهنما",
+        "/api/login": "ورود (شناسه/رمز)",
+        "/api/logout": "خروج",
+        "/api/admin/login": "ورود به پنل مدیریت",
+        "/api/run": "شروع محاسبه",
+        "/api/decide": "تأیید/رد سیگنال",
+        "/api/snapshot": "ذخیرهٔ اسنپ‌شات",
+        "/api/connections": "ذخیره/خواندن دفتر اتصال",
+        "/api/test-live": "آزمایش دادهٔ زنده",
+        "/api/autoconnect": "اتصال خودکار",
+        "/api/daily": "اجرای مراسم امروز",
+        "/api/trial": "ثبت/بازسنجی دفتر",
+        "/api/backtest": "اجرای پس‌آزمایی",
+        "/api/bundle": "ساخت بستهٔ تحویل",
+        "/api/selftest": "اجرای آزمون ۱۰ دقیقه‌ای",
+        "/api/dossier": "ساخت پروندهٔ سرمایه‌گر",
+        "/api/health": "بررسی سلامت",
+        "/api/diagnose": "گزارش عیب‌یابی",
+        "/api/usage": "گواهی استفاده",
+        "/api/license": "مجوز دسترسی",
+        "/api/state/backup": "پشتیبان‌گیری",
+        "/api/gate/update": "تغییر دروازه (کاربر/رمز/خاموشی)",
+        "/api/prospects": "تابلوی پیگیری مخاطبان",
+        "/api/ritual": "مراسم فروش امروز",
+    }
+
+    def _audit_log(self, method: str, path: str, role, uid, ms: int, err: str | None) -> None:
+        """یک ردیف به لاگِ ممیزی می‌نویسد — هرگز نباید خودش خطا بدهد."""
+        try:
+            # فقط کارها و صفحاتِ معنادار؛ پرونده‌های ثابت و فیس‌آیکون لاگ نمی‌شوند تا پر نشود
+            if not (path.startswith("/api/") or path in ("/", "/admin", "/guide", "/login")):
+                return
+            # خطاهای ۴۰۴ِ مسیریِ غیرموجود هم ثبت می‌شوند (نشانهٔ لینک خراب)
+            status = getattr(self, "_audit_status", 0) or 0
+            level = "error" if (err or status >= 500) else "info"
+            label = self.ACTION_LABELS.get(path, f"{method} {path}")
+            ip = "—"
+            try:
+                ip = str(self.client_address[0]) if self.client_address else "—"
+            except Exception:
+                pass
+            details = {"query": dict(parse_qs(urlparse(self.path).query)) if urlparse(self.path).query else None}
+            audit.write(DATA, user=uid, role=str(role or "بیرونی"), ip=ip, method=method,
+                        path=path, action=label, details=details, status=status, ms=ms,
+                        level=level, error=err)
+        except Exception:
+            pass
 
     def _reject_method(self) -> None:
         self._send(405, '{"error": "این روش درخواست پشتیبانی نمی‌شود."}'.encode("utf-8"),
@@ -594,6 +660,7 @@ class Handler(BaseHTTPRequestHandler):
     # ---------- کمکی‌ها
     def _send(self, code: int, body: bytes, ctype: str = "application/json; charset=utf-8",
               headers: dict | None = None) -> None:
+        self._audit_status = code
         self.send_response(code)
         self.send_header("Content-Type", ctype)
         self.send_header("Content-Length", str(len(body)))
@@ -796,6 +863,20 @@ class Handler(BaseHTTPRequestHandler):
         if u.path == "/favicon.ico":
             return self._send(204, b"")
 
+        if u.path == "/api/admin/audit":
+            if not admauth.check_token(self._token()):
+                return self._json({"error": "این بخش فقط با ورود به پنل مدیریت در دسترس است.",
+                                   "needs_admin": True}, 403)
+            try:
+                limit = int((q.get("limit") or ["500"])[0])
+            except ValueError:
+                limit = 500
+            entries = audit.read(DATA, limit=limit, user=(q.get("user") or [None])[0] or None,
+                                 q=(q.get("search") or [None])[0] or None,
+                                 level=(q.get("level") or [None])[0] or None)
+            return self._json({"ok": True, "entries": entries, "count": len(entries),
+                               "stats": audit.stats(DATA)})
+
         if u.path == "/api/health":
             # «بررسی سلامت» به پنل مدیریت منتقل شده است؛ خواندنش هم با توکن ورود می‌شود.
             if not admauth.check_token(self._token()):
@@ -991,6 +1072,25 @@ class Handler(BaseHTTPRequestHandler):
         if u.path == "/api/admin/logout":
             admauth.revoke_token(self._token(body))
             return self._json({"ok": True})
+        if u.path == "/api/admin/audit":
+            if not admauth.check_token(self._token(body)):
+                return self._json({"error": "این بخش فقط با ورود به پنل مدیریت در دسترس است.",
+                                   "needs_admin": True}, 403)
+            action = str((body or {}).get("action") or "").strip()
+            if action == "clear":
+                n = audit.clear(DATA)
+                return self._json({"ok": True, "cleared": n})
+            if action == "reset":
+                name = audit.reset(DATA)
+                return self._json({"ok": True, "archived": name or "(لاگ خالی بود)"})
+            if action == "copy":
+                try:
+                    limit = int((body or {}).get("limit") or 5000)
+                except (TypeError, ValueError):
+                    limit = 5000
+                return self._json({"ok": True, "text": audit.text(DATA, limit=limit),
+                                   "stats": audit.stats(DATA)})
+            return self._json({"error": "کار ناشناخته: فقط copy / clear / reset."}, 400)
         if u.path in ADMIN_MAP:
             if not admauth.check_token(self._token(body)):
                 return self._json({"error": "این بخش فقط با ورود به پنل مدیریت در دسترس است.",

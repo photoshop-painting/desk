@@ -30,7 +30,7 @@ import unittest
 KEYS = [
     "s-health", "s-data", "s-settings", "s-news", "s-run", "s-decide",
     "s-backtest", "s-bundle", "s-trial", "s-blind", "s-math",
-    "admin", "login", "guide",
+    "proof", "admin", "login", "guide",
 ]
 
 BANNED = (
@@ -85,6 +85,7 @@ class HelpContentTests(unittest.TestCase):
             "s-trial": ["مراسم امروز", "زنجیره", "بازسنجی", "سرمایه‌گر"],
             "s-blind": ["پرسش", "حساب‌رسی", "پیمان‌نامه"],
             "s-math": ["شوک", "ورشکستگی", "راهبرد"],
+            "proof": ["پس‌آزمایی", "بسته تحویل", "دفتر سرمایه‌گر", "آزمون کور", "راهبردها"],
             "admin": ["سلامت", "مجوز", "پشتیبان", "کاربران", "گواهی"],
             "login": ["شناسه", "رمز", "ورود"],
             "guide": ["روز اول", "شصت ثانیه", "پرسش‌های پرتکرار"],
@@ -116,6 +117,14 @@ class HelpWiringTests(unittest.TestCase):
             self.assertIn('<script src="help.js"></script>', html, key)
             self.assertIn(f"openHelp('{key}')", html, key)
             self.assertIn("راهنمای این صفحه", html, key)
+
+    def test_nav_has_help_key_per_step_and_group(self):
+        """در فهرست کناری، هر گام و گروهِ اثبات، کلید «؟» جداگانه دارند."""
+        APP = (WEB / "app.js").read_text(encoding="utf-8")
+        self.assertIn('className = "nav-q"', APP)
+        self.assertIn('openHelp("s-" + s[0])', APP)
+        self.assertIn('openHelp("proof")', APP)
+        self.assertIn("nav-sep", APP)
 
 
 if __name__ == "__main__":

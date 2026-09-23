@@ -151,20 +151,39 @@ async function buildBankroll() {
 function buildNav() {
   const nav = el("nav");
   STEPS.forEach((s, i) => {
+    const row = document.createElement("div");
+    row.className = "nav-row";
     const a = document.createElement("a");
     a.href = "#";
     a.id = "nav-" + s[0];
     a.innerHTML = `<span class="n">${i + 1}</span>${s[1]}`;
     a.onclick = (e) => { e.preventDefault(); showStep(i); };
-    nav.appendChild(a);
+    const q = document.createElement("button");
+    q.type = "button";
+    q.className = "nav-q";
+    q.title = "راهنمای این گام — صفحه و همهٔ پارامترهایش";
+    q.textContent = "؟";
+    q.onclick = () => openHelp("s-" + s[0]);
+    row.appendChild(a);
+    row.appendChild(q);
+    nav.appendChild(row);
   });
   // گام‌های ۷ تا آخر «اثبات برنامه»‌اند (برای سرمایه‌گر/کارفرما)، نه کارِ روزانهٔ کارفرما:
   // زیرِ آن‌ها یک خط جداکنندهٔ روشن می‌روید تا جریانِ واجب (گام‌های ۱ تا ۶) دیده شود.
   if (STEPS.length >= 7 && nav.children[7]) {
+    const row = document.createElement("div");
+    row.className = "nav-row nav-sep";
     const sep = document.createElement("h2");
     sep.textContent = "اثباتِ برنامه (اختیاری)";
-    sep.style.marginTop = "16px";
-    nav.insertBefore(sep, nav.children[7]);
+    const q = document.createElement("button");
+    q.type = "button";
+    q.className = "nav-q";
+    q.title = "این گروه چه است و هر گامش چه کار درمی‌آید";
+    q.textContent = "؟";
+    q.onclick = () => openHelp("proof");
+    row.appendChild(sep);
+    row.appendChild(q);
+    nav.insertBefore(row, nav.children[7]);
   }
 }
 

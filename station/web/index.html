@@ -22,6 +22,13 @@
           margin-bottom:3px; border:1px solid transparent; }
   nav a:hover { background:#f0f4f3; }
   nav a.active { background:#d7e6df; border-color:#bcd8cd; font-weight:bold; }
+  nav .nav-row { display:flex; align-items:center; gap:4px; }
+  nav .nav-row a { flex:1; min-width:0; }
+  nav .nav-q { flex:0 0 auto; width:22px; height:22px; border-radius:50%; border:1px solid #d3e0da;
+               background:#f4f8f6; color:#0b3d2e; font-size:12px; line-height:1; cursor:pointer; padding:0; }
+  nav .nav-q:hover { background:#e2efe9; }
+  nav .nav-sep { margin-top:14px; }
+  nav .nav-sep h2 { flex:1; margin:4px 0; }
   nav a .n { display:inline-block; width:20px; height:20px; line-height:20px; text-align:center; border-radius:50%;
              background:#eef2f7; font-size:11.5px; margin-left:6px; }
   nav a.done .n { background:var(--ok); color:#fff; }

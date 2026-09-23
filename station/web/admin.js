@@ -292,6 +292,91 @@ async function openAdminFile(key) {
   }
 }
 
+/* ------------------------------------------- ۵. لاگ‌ها (ممیزی) */
+
+async function loadAudit() {
+  const user = $("audit-user").value;
+  const search = $("audit-search").value.trim();
+  const level = $("audit-level").value;
+  const limit = $("audit-limit").value || "500";
+  const qs = new URLSearchParams({ limit });
+  if (user) qs.set("user", user);
+  if (search) qs.set("search", search);
+  if (level) qs.set("level", level);
+  try {
+    const r = await fetch("/api/admin/audit?" + qs.toString(),
+      { headers: { "X-Admin-Token": token() } });
+    const d = await r.json();
+    if (!r.ok || !d.ok) throw new Error(d.error || r.status);
+    const tb = $("audit-table").querySelector("tbody");
+    tb.innerHTML = "";
+    for (const e of d.entries) {
+      const tr = document.createElement("tr");
+      const det = (e.details && e.details.query)
+        ? Object.entries(e.details.query).map(([k, v]) => `${k}=${Array.isArray(v) ? v[0] : v}`).join(" · ")
+        : "";
+      const err = e.error ? `<div style="color:#b3261e;font-size:12px;white-space:pre-wrap">${e.error.slice(0, 300)}</div>` : "";
+      const stColor = (e.status >= 500) ? "#b3261e" : (e.status === 401 || e.status === 403) ? "#b45309" : "#0a7d33";
+      tr.innerHTML =
+        `<td style="white-space:nowrap">${e.ts}</td>` +
+        `<td>${e.user}</td><td>${e.role}</td>` +
+        `<td>${e.method} ${e.path}${e.action && e.action !== e.path ? `<div class="hint">${e.action}</div>` : ""}</td>` +
+        `<td>${det}${err}</td>` +
+        `<td style="color:${stColor};font-weight:bold;white-space:nowrap">${e.status} · ${e.ms}ms</td>`;
+      tb.appendChild(tr);
+    }
+    const s = d.stats;
+    $("audit-stats").textContent =
+      `جمع: ${s.entries} ردیف · خطا: ${s.errors} · کاربر: ${s.users} · آرشیو: ${s.archived} · ${Math.round(s.bytes / 1024)}KB`;
+    logTo("log-audit", `${d.count} ردیف خوانده شد.`);
+    // فیلترِ کاربرها را با همان کاربرانِ دیدگی پر می‌کنیم
+    const sel = $("audit-user");
+    const cur = sel.value;
+    const seen = [...new Set(d.entries.map((e) => e.user).filter((u) => u !== "—"))];
+    for (const u of seen) {
+      if (![...sel.options].some((o) => o.value === u)) {
+        const o = document.createElement("option");
+        o.value = u; o.textContent = u;
+        sel.appendChild(o);
+      }
+    }
+    sel.value = cur;
+  } catch (e) {
+    logTo("log-audit", "خواندن لاگ ناموفق: " + e.message);
+  }
+}
+
+async function copyAudit() {
+  try {
+    const d = await api("/api/admin/audit", { action: "copy", limit: 5000 });
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(d.text);
+      logTo("log-audit", "لاگ در حافظه کپی شد (قابل چسباندن در تلگرام/ایمیل).");
+    } else {
+      logTo("log-audit", "کپی آماده است (این مرورگر حافظه ندارد؛ متن در پاسخِ سرور بود).");
+    }
+  } catch (e) {
+    logTo("log-audit", "کپی ناموفق: " + e.message);
+  }
+}
+
+async function clearAudit() {
+  if (!confirm("کل لاگِ ممیزی پاک شود؟ (آرشیو نمی‌شود)")) return;
+  const d = await api("/api/admin/audit", { action: "clear" });
+  logTo("log-audit", `${d.cleared} ردیف پاک شد.`);
+  loadAudit();
+}
+
+async function resetAudit() {
+  if (!confirm("لاگِ جاری آرشیو شود و پروندهٔ تازه باز شود؟")) return;
+  const d = await api("/api/admin/audit", { action: "reset" });
+  logTo("log-audit", "ریست شد؛ آرشیو: " + d.archived);
+  loadAudit();
+}
+
+window.loadAudit = loadAudit; window.copyAudit = copyAudit;
+window.clearAudit = clearAudit; window.resetAudit = resetAudit;
+
 /* ---------------------------------------------------- راه‌اندازی */
 
 $("dev-credit").innerHTML = CREDIT;

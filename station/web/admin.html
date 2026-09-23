@@ -35,6 +35,8 @@
   button.primary { background:var(--green); color:#fff; border-color:var(--green); }
   button.primary:hover { background:#0d4a37; }
   button.ghost { background:transparent; }
+  button.danger { background:#b3261e; color:#fff; border-color:#b3261e; }
+  button.danger:hover { background:#8f1d17; }
   .log { background:#0f172a; color:#d8e2f0; border-radius:8px; padding:10px 12px; font-size:12.5px;
          white-space:pre-wrap; min-height:44px; direction:rtl; font-family: Tahoma, monospace;
          max-height:340px; overflow:auto; }
@@ -55,7 +57,7 @@
 <body>
 <header>
   <h1>پنل مدیریت ایستگاه تصمیم مشتقه</h1>
-  <div class="meta">بررسی سلامت · مجوز دسترسی و گزارش عیب‌یابی · گواهی استفادهٔ موفق</div>
+  <div class="meta">بررسی سلامت · مجوز دسترسی و گزارش عیب‌یابی · گواهی استفادهٔ موفق · لاگ‌ها</div>
   <div class="badge" id="who">وارد نشده‌اید</div>
   <div style="margin-top:8px">
     <button type="button" class="help-btn" onclick="openHelp('admin')"
@@ -212,6 +214,44 @@
         <button onclick="setAdminCreds()">ذخیرهٔ شناسه/رمز مدیر</button>
       </div>
       <div class="log" id="log-admin-creds">آماده.</div>
+    </section>
+
+    <section class="card" id="audit-card">
+      <h4>۵. لاگ‌ها — همهٔ کارهای همهٔ کاربران + خطاها (برای ریشه‌یابی باگ)</h4>
+      <p class="hint">هر کاری که هر کاربر از هر جا انجام داد، با زمان، نقش و نتیجه‌اش اینجا ثبت
+      می‌شود؛ هر خطای داخلی هم با جزئیاتش. از این‌جا می‌توانید <b>ببینید</b>، <b>کپی</b> کنید،
+      <b>پاک</b> کنید (بدون آرشیو) یا <b>ریست</b> کنید (اول آرشیو، بعد خالی). رمزها و کلیدها
+      هرگز در این لاگ نمی‌نشینند.</p>
+      <div class="row">
+        <select id="audit-user" style="max-width:180px">
+          <option value="">همهٔ کاربران</option>
+        </select>
+        <input type="text" id="audit-search" placeholder="جست‌وجو (مثلاً: محاسبه یا 500)" style="max-width:260px">
+        <select id="audit-level" style="max-width:150px">
+          <option value="">همهٔ سطوح</option>
+          <option value="error">فقط خطاها</option>
+          <option value="info">فقط کارها</option>
+        </select>
+        <select id="audit-limit" style="max-width:130px">
+          <option value="200">۲۰ ردیف</option>
+          <option value="500" selected>۵۰۰ ردیف</option>
+          <option value="2000">۲۰۰۰ ردیف</option>
+        </select>
+        <button class="primary" onclick="loadAudit()">خواندن لاگ</button>
+      </div>
+      <div class="row">
+        <button onclick="copyAudit()">کپی کلِ دیده‌شده</button>
+        <button class="danger" onclick="clearAudit()">پاک کردن لاگ</button>
+        <button class="danger" onclick="resetAudit()">ریست (آرشیو + خالی)</button>
+        <span class="hint" id="audit-stats"></span>
+      </div>
+      <div style="max-height:420px;overflow:auto">
+        <table id="audit-table">
+          <thead><tr><th>زمان (UTC)</th><th>کاربر</th><th>نقش</th><th>کار</th><th>جزئیات</th><th>نتیجه</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="log" id="log-audit">هنوز خوانده نشده است.</div>
     </section>
 
   </div>
