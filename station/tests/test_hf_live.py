@@ -533,6 +533,12 @@ class TestStateKeeper(LiveBundleBase):
         self.assertIn("state-box", html)
         self.assertIn("پشتیبان‌گیری الان", html)
 
+    def test_diagnose_request_does_not_run_test_driver_in_server(self):
+        """درخواستِ عیب‌یابیِ پنل باید «quick» بفرستد تا ۷۳۳ آزمون داخلِ درخواست
+        روی میزبان ابری (۰.۱ هسته/۵۱۲ مگابایت) اجرا نشود و درخواست معلق نماند."""
+        js = (BASE / "web" / "admin.js").read_text(encoding="utf-8")
+        self.assertIn('"/api/admin/diagnose", {quick: true}', js)
+
     def test_keeper_exposes_info_and_manual_backup(self):
         """نگهبان وضعیت باید هم «گزارش وضعیت» بدهد و هم «پشتیبان‌گیری فوری»."""
         src = (self.out / "space_state.py").read_text(encoding="utf-8")

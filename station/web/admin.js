@@ -139,7 +139,10 @@ async function revokeLicense() {
 
 async function runDiagnose() {
   logTo("log-access", "در حال ساخت گزارش عیب‌یابی…");
-  const d = await api("/api/admin/diagnose", {});
+  // «quick» تا درایورِ آزمون را داخلِ درخواست نکشیم: روی میزبان ابریِ ۰.۱ هسته و ۵۱۲ مگابایت،
+  // همان ۷۳۳ آزمون می‌تواند چند دقیقه بکشد و درخواست را بماند؛ درایور را جای خود (رایانهٔ
+  // کاربر) اجرا کنید. بقیهٔ گزارش‌گیر — سلامت، مجوز، اتصال، پرونده‌ها — کامل می‌آید.
+  const d = await api("/api/admin/diagnose", {quick: true});
   if (!d.ok) { logTo("log-access", "خطا: " + (d.error || "ساخت ناموفق")); return; }
   logTo("log-access", `گزارش ساخته شد: ${d.path || d.html}`);
   if (d.fingerprint) logTo("log-access", `اثر انگشت موتور: ${d.fingerprint}`);
