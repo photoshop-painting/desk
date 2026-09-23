@@ -549,10 +549,16 @@ class Handler(BaseHTTPRequestHandler):
         خطای یک نفر، بقیه را قفل نکند.
         """
         if TRUST_PROXY:
-            for key in ("CF-Connecting-IP", "X-Real-IP", "X-Forwarded-For"):
+            for key in ("CF-Connecting-IP", "X-Real-IP"):
                 val = str(self.headers.get(key) or "").split(",")[0].strip()
                 if val:
                     return val
+            # X-Forwarded-For را ممکن است کلاینت خودش هم بفرستد (ساختگی)؛ پروکسیِ
+            # قابل‌اعتماد (رندر) نشانیِ واقعی را در آخرِ زنجیره می‌نویسد، پس آخرین را می‌گیریم.
+            xff = str(self.headers.get("X-Forwarded-For") or "")
+            parts = [p.strip() for p in xff.split(",") if p.strip()]
+            if parts:
+                return parts[-1]
         return str(self.client_address[0])
 
     def _secure_cookie(self) -> bool:
@@ -638,7 +644,7 @@ class Handler(BaseHTTPRequestHandler):
             label = self.ACTION_LABELS.get(path, f"{method} {path}")
             ip = "—"
             try:
-                ip = str(self.client_address[0]) if self.client_address else "—"
+                ip = self._client_ip()
             except Exception:
                 pass
             details = {"query": dict(parse_qs(urlparse(self.path).query)) if urlparse(self.path).query else None}

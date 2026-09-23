@@ -293,6 +293,21 @@ class TestBruteForce(SecurityBase):
                                headers={"X-Forwarded-For": "198.51.100.9"})
         self.assertEqual(200, code2)                          # کاربر دیگری قفل نشده است
 
+    def test_xff_spoofed_prefix_is_ignored_trusted_last(self):
+        """کلاینت می‌تواند X-Forwarded-For جعلی بفرستد؛ پروکسیِ قابل‌اعتماد نشانیِ واقعی را در آخرِ زنجیره می‌نویسد."""
+        for _ in range(5):
+            self.raw("/api/login", method="POST",
+                     body=json.dumps({"id": USER[0], "pass": "Ghalat-Pass-9913"}),
+                     headers={"X-Forwarded-For": "9.9.9.9, 203.0.113.71"})
+        code, _, _ = self.raw("/api/login", method="POST",
+                              body=json.dumps({"id": USER[0], "pass": USER[1]}),
+                              headers={"X-Forwarded-For": "203.0.113.71"})
+        self.assertEqual(401, code)              # قفل برای نشانیِ واقعی (آخرینِ زنجیره) است
+        code2, _, _ = self.raw("/api/login", method="POST",
+                               body=json.dumps({"id": USER[0], "pass": USER[1]}),
+                               headers={"X-Forwarded-For": "9.9.9.9"})
+        self.assertEqual(200, code2)             # پیشوندِ جعلی قفل نمی‌شود
+
     def test_admin_lockout_does_not_block_a_user(self):
         ip = "203.0.113.88"
         for _ in range(5):
@@ -307,6 +322,30 @@ class TestBruteForce(SecurityBase):
                                body=json.dumps({"id": ADMIN[0], "pass": ADMIN[1]}),
                                headers={"X-Forwarded-For": ip})
         self.assertEqual(401, code2)                          # همان نشانی همچنان قفل است
+
+
+class TestAuditClientIp(SecurityBase):
+    """لاگِ ممیزی پشتِ پروکسیِ قابل‌اعتماد، نشانیِ واقعیِ کلاینت را بنویسد، نه نشانیِ تونل."""
+
+    def test_audit_row_carries_xff_ip(self):
+        req = urllib.request.Request(self.base + "/api/login",
+                                     data=json.dumps({"id": ADMIN[0], "pass": ADMIN[1]}).encode(),
+                                     headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=20) as r:
+            cookie = r.headers.get("Set-Cookie", "").split(";")[0]
+        req2 = urllib.request.Request(self.base + "/api/admin/login",
+                                      data=json.dumps({"id": ADMIN[0], "pass": ADMIN[1]}).encode(),
+                                      headers={"Content-Type": "application/json", "Cookie": cookie})
+        with urllib.request.urlopen(req2, timeout=20) as r:
+            tok = json.loads(r.read())["token"]
+        self.raw("/api/gate/status", headers={"X-Forwarded-For": "198.51.100.77"})
+        req3 = urllib.request.Request(self.base + "/api/admin/audit?limit=100",
+                                      headers={"X-Admin-Token": tok, "Cookie": cookie})
+        with urllib.request.urlopen(req3, timeout=20) as r:
+            entries = json.loads(r.read())["entries"]
+        rows = [e for e in entries
+                if e.get("path") == "/api/gate/status" and e.get("ip") == "198.51.100.77"]
+        self.assertTrue(rows, "نشانیِ واقعی (X-Forwarded-For) باید در لاگ بنشیند")
 
 
 class TestInternalErrorsAreReported(SecurityBase):
